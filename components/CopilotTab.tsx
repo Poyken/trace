@@ -99,43 +99,43 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
   };
 
   return (
-    <div className="flex flex-col h-[750px] bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+    <div className="flex flex-col h-[750px] bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl transition-colors duration-300">
       {/* Top Banner */}
-      <div className="p-4 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center shadow-sm">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               Vinatech MES Operations Copilot
-              <span className="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-800 px-2 py-0.5 rounded-full font-mono">
+              <span className="text-[10px] bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-400 border border-cyan-300 dark:border-cyan-800 px-2 py-0.5 rounded-full font-mono">
                 Standard 4 Dòng Vàng
               </span>
             </h3>
-            <p className="text-xs text-slate-400">Trợ lý AI chuyên trách chẩn đoán sự cố, xuất hướng dẫn OP & Hotfix an toàn</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Trợ lý AI chuyên trách chẩn đoán sự cố, xuất hướng dẫn OP & Hotfix an toàn</p>
           </div>
         </div>
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/40 dark:bg-transparent">
         {messages.map((msg) => (
           <div
             key={msg.id}
             className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {msg.role === 'assistant' && (
-              <div className="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-800 flex items-center justify-center shrink-0 mt-1">
-                <Bot className="w-4 h-4 text-cyan-400" />
+              <div className="w-8 h-8 rounded-lg bg-cyan-100 dark:bg-cyan-950 border border-cyan-300 dark:border-cyan-800 flex items-center justify-center shrink-0 mt-1 shadow-sm">
+                <Bot className="w-4 h-4 text-cyan-700 dark:text-cyan-400" />
               </div>
             )}
 
             <div
               className={`max-w-[85%] rounded-2xl p-4 text-sm ${
                 msg.role === 'user'
-                  ? 'bg-cyan-600 text-white rounded-tr-none'
-                  : 'bg-slate-950/90 border border-slate-800/90 text-slate-200 rounded-tl-none space-y-3'
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-tr-none shadow-md'
+                  : 'bg-white dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800/90 text-slate-800 dark:text-slate-200 rounded-tl-none space-y-3 shadow-sm'
               }`}
             >
               {msg.role === 'user' ? (
@@ -145,40 +145,40 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
                   {msg.structuredResponse ? (
                     <div className="space-y-3">
                       {/* 4 Dòng Vàng Cards */}
-                      <div className="p-3 bg-red-950/30 border border-red-900/60 rounded-xl space-y-1">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-red-400 uppercase tracking-wide">
+                      <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/60 rounded-xl space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wide">
                           <AlertCircle className="w-4 h-4" /> 1. Nguyên Nhân Gốc Rễ (Root Cause)
                         </div>
-                        <p className="text-slate-300 text-xs">{msg.structuredResponse.rootCause}</p>
+                        <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">{msg.structuredResponse.rootCause}</p>
                       </div>
 
-                      <div className="p-3 bg-cyan-950/30 border border-cyan-900/60 rounded-xl space-y-1">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-400 uppercase tracking-wide">
+                      <div className="p-3 bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-900/60 rounded-xl space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-wide">
                           <ShieldCheck className="w-4 h-4" /> 2. Hiện Trạng Thực Tế
                         </div>
-                        <p className="text-slate-300 text-xs">{msg.structuredResponse.currentStatus}</p>
+                        <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">{msg.structuredResponse.currentStatus}</p>
                       </div>
 
-                      <div className="p-3 bg-amber-950/30 border border-amber-900/60 rounded-xl space-y-1">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400 uppercase tracking-wide">
+                      <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-xl space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
                           <Wrench className="w-4 h-4" /> 3. Hướng Dẫn OP Tự Xử Lý (Workaround)
                         </div>
-                        <p className="text-slate-300 text-xs">{msg.structuredResponse.workaround}</p>
+                        <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">{msg.structuredResponse.workaround}</p>
                       </div>
 
                       {msg.structuredResponse.hotfixSql && (
-                        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-2">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-semibold">
+                        <div className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 space-y-2">
+                          <div className="flex justify-between items-center text-xs text-slate-600 dark:text-slate-400 font-semibold">
                             <span>4. SQL Hotfix Chuẩn (BEGIN TRAN...ROLLBACK)</span>
                             <button
                               onClick={() => copyToClipboard(msg.structuredResponse?.hotfixSql || '', msg.id)}
-                              className="flex items-center gap-1 px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded transition font-mono text-[11px]"
+                              className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-cyan-700 dark:text-cyan-400 rounded-lg transition font-mono text-[11px] border border-slate-200 dark:border-slate-700 shadow-sm"
                             >
-                              {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                              {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                               {copiedId === msg.id ? 'Đã copy' : 'Copy SQL'}
                             </button>
                           </div>
-                          <pre className="p-2.5 rounded bg-slate-950 text-slate-300 font-mono text-xs overflow-x-auto border border-slate-800/80">
+                          <pre className="p-3 rounded-lg bg-slate-900 text-slate-100 font-mono text-xs overflow-x-auto border border-slate-800 shadow-inner">
                             <code>{msg.structuredResponse.hotfixSql}</code>
                           </pre>
                         </div>
@@ -190,7 +190,7 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
 
                   {/* Quick Action Buttons */}
                   {msg.quickActions && msg.quickActions.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800/60">
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200 dark:border-slate-800/60">
                       {msg.quickActions.map((action, idx) => (
                         <button
                           key={idx}
@@ -201,33 +201,33 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
                               onNavigateToDiagnostics(action.actionType, action.payload);
                             }
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/70 text-cyan-300 text-xs font-medium transition"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 dark:bg-cyan-950/60 dark:hover:bg-cyan-900/60 border border-cyan-200 dark:border-cyan-800/70 text-cyan-800 dark:text-cyan-300 text-xs font-medium transition shadow-sm"
                         >
                           {action.label}
-                          <ArrowRight className="w-3 h-3 text-cyan-400" />
+                          <ArrowRight className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
                         </button>
                       ))}
                     </div>
                   )}
                 </>
               )}
-              <div className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-cyan-200' : 'text-slate-500'}`}>
+              <div className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-cyan-100' : 'text-slate-400 dark:text-slate-500'}`}>
                 {msg.timestamp}
               </div>
             </div>
 
             {msg.role === 'user' && (
-              <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 mt-1">
-                <User className="w-4 h-4 text-slate-300" />
+              <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 flex items-center justify-center shrink-0 mt-1 shadow-sm">
+                <User className="w-4 h-4 text-slate-700 dark:text-slate-300" />
               </div>
             )}
           </div>
         ))}
 
         {loading && (
-          <div className="flex gap-3 items-center text-slate-400 text-xs">
-            <div className="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-800 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-cyan-400 animate-spin" />
+          <div className="flex gap-3 items-center text-slate-500 dark:text-slate-400 text-xs">
+            <div className="w-8 h-8 rounded-lg bg-cyan-100 dark:bg-cyan-950 border border-cyan-300 dark:border-cyan-800 flex items-center justify-center">
+              <Bot className="w-4 h-4 text-cyan-700 dark:text-cyan-400 animate-spin" />
             </div>
             <span>Copilot đang chẩn đoán & tra cứu dữ liệu...</span>
           </div>
@@ -235,12 +235,12 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
       </div>
 
       {/* Suggested Prompt Pills */}
-      <div className="px-4 py-2 bg-slate-950/40 border-t border-slate-800 flex gap-2 overflow-x-auto text-xs">
+      <div className="px-4 py-2.5 bg-slate-50 dark:bg-slate-950/40 border-t border-slate-200 dark:border-slate-800 flex gap-2 overflow-x-auto text-xs">
         {samplePrompts.map((p, idx) => (
           <button
             key={idx}
             onClick={() => handleSendMessage(p.text)}
-            className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-full border border-slate-800 whitespace-nowrap transition"
+            className="px-3 py-1 bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-800 whitespace-nowrap transition shadow-sm font-medium"
           >
             {p.label}
           </button>
@@ -248,7 +248,7 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
       </div>
 
       {/* Input Box */}
-      <div className="p-4 bg-slate-950 border-t border-slate-800">
+      <div className="p-4 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -261,7 +261,7 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Nhập mã Lot, sự cố B530/B540, máy kẹt, hoặc mã nhân viên..."
-            className="flex-1 bg-slate-900 border border-slate-800 focus:border-cyan-500 focus:outline-none rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500"
+            className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 focus:border-cyan-500 focus:outline-none rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 transition"
           />
           <button
             type="submit"
