@@ -11,10 +11,10 @@ export async function GET(request: NextRequest) {
   }
 
   const filtered = all.filter(e =>
-    e.code.toLowerCase().includes(q) ||
-    e.title.toLowerCase().includes(q) ||
-    e.root_cause.toLowerCase().includes(q) ||
-    e.fast_fix.toLowerCase().includes(q)
+    (e.code || '').toLowerCase().includes(q) ||
+    (e.title || '').toLowerCase().includes(q) ||
+    (e.root_cause || '').toLowerCase().includes(q) ||
+    (e.fast_fix || '').toLowerCase().includes(q)
   );
 
   return NextResponse.json({ errors: filtered, total: filtered.length });

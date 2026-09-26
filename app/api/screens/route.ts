@@ -11,9 +11,9 @@ export async function GET(request: NextRequest) {
   }
 
   const filtered = all.filter(s =>
-    s.id.toLowerCase().includes(q) ||
-    s.name.toLowerCase().includes(q) ||
-    s.tables.some(t => t.toLowerCase().includes(q)) ||
+    (s.id || '').toLowerCase().includes(q) ||
+    (s.name || '').toLowerCase().includes(q) ||
+    (s.tables || []).some(t => (t || '').toLowerCase().includes(q)) ||
     (s.sp_get && s.sp_get.toLowerCase().includes(q)) ||
     (s.sp_iud && s.sp_iud.toLowerCase().includes(q))
   );

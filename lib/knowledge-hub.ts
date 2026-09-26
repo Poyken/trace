@@ -66,14 +66,14 @@ export function getAllScreens(): ScreenItem[] {
   if (!data?.screens) return [];
 
   return Object.entries(data.screens).map(([id, s]) => ({
-    id,
-    name: s.name || '',
-    module: s.module || 'Production',
-    sp_get: s.sp_get,
-    sp_iud: s.sp_iud,
-    tables: s.tables || [],
-    common_bugs: s.common_bugs || {},
-    fix_template: s.fix_template
+    id: id || '',
+    name: s?.name || id || '',
+    module: s?.module || 'Production',
+    sp_get: s?.sp_get || '',
+    sp_iud: s?.sp_iud || '',
+    tables: Array.isArray(s?.tables) ? s.tables : [],
+    common_bugs: s?.common_bugs || {},
+    fix_template: s?.fix_template || ''
   }));
 }
 
@@ -82,10 +82,10 @@ export function getAllPopErrors(): PopErrorItem[] {
   if (!data?.top_errors) return [];
 
   return Object.entries(data.top_errors).map(([code, err]) => ({
-    code,
-    title: err.title || '',
-    root_cause: err.root_cause || '',
-    fast_fix: err.fast_fix || ''
+    code: code || '',
+    title: err?.title || code || '',
+    root_cause: err?.root_cause || '',
+    fast_fix: err?.fast_fix || ''
   }));
 }
 
@@ -94,30 +94,30 @@ export function getAllGwForms(): GwFormItem[] {
   if (!data?.forms) return [];
 
   return Object.entries(data.forms).map(([id, f]) => ({
-    id,
-    name: f.form_name || f.name || id,
-    code: f.form_code || f.code,
-    description: f.description || '',
-    tables: f.tables || [],
-    approval_lines: f.approval_lines || [],
-    erp_integration: f.erp_table || f.erp_integration
+    id: id || '',
+    name: f?.name || f?.form_name || id,
+    code: f?.form_code || f?.code || '',
+    description: f?.description || '',
+    tables: Array.isArray(f?.tables) ? f.tables : [],
+    approval_lines: Array.isArray(f?.approval_lines) ? f.approval_lines : [],
+    erp_integration: f?.erp_table || f?.erp_integration || ''
   }));
 }
 
 export function getAllDatabases(): DatabaseItem[] {
   const data = readJsonFile<{ Databases: any[] }>('DATABASE_MATRIX.json');
-  if (!data?.Databases) return [];
+  if (!data?.Databases || !Array.isArray(data.Databases)) return [];
 
   return data.Databases.map((db) => ({
-    name: db.DatabaseName || db.name,
-    profile: db.Profile || db.profile,
-    server: db.Server,
-    port: db.Port || 5398,
-    tablesCount: db.TablesCount || db.tables_count || 0,
-    viewsCount: db.ViewsCount || db.views_count || 0,
-    spCount: db.SPCount || db.sp_count || 0,
-    role: db.Role || db.role || 'Production Core',
-    description: db.Description || db.description
+    name: db?.Database || db?.DatabaseName || db?.name || 'Unknown DB',
+    profile: db?.Profile || db?.profile || '',
+    server: db?.Server || 'dbserver.hycap.co.kr',
+    port: db?.Port || 5398,
+    tablesCount: db?.TableCount || db?.TablesCount || 0,
+    viewsCount: db?.ViewCount || db?.ViewsCount || 0,
+    spCount: db?.SPCount || 0,
+    role: db?.Pillar || db?.Role || db?.role || 'Production Core',
+    description: db?.Description || db?.description || ''
   }));
 }
 
@@ -126,43 +126,44 @@ export function getAllKsysModules(): KsysModuleItem[] {
   if (!data?.modules) return [];
 
   return Object.entries(data.modules).map(([seq, m]) => ({
-    seq,
-    name: m.name || m.module_name || `Module ${seq}`,
-    prefix: m.prefix || m.table_prefix,
-    description: m.description,
-    tables: m.core_tables || m.tables || []
+    seq: seq || '',
+    name: m?.name || m?.module_name || `Module ${seq}`,
+    prefix: m?.prefix || m?.table_prefix || '',
+    description: m?.description || '',
+    tables: Array.isArray(m?.core_tables) ? m.core_tables : []
   }));
 }
 
 export function searchSystemKnowledge(query: string) {
-  const q = query.toLowerCase().trim();
+  const q = (query || '').toLowerCase().trim();
   if (!q) return null;
 
   const screens = getAllScreens().filter(s =>
-    s.id.toLowerCase().includes(q) ||
-    s.name.toLowerCase().includes(q) ||
-    s.tables.some(t => t.toLowerCase().includes(q)) ||
+    (s.id || '').toLowerCase().includes(q) ||
+    (s.name || '').toLowerCase().includes(q) ||
+    (s.tables || []).some(t => (t || '').toLowerCase().includes(q)) ||
     (s.sp_get && s.sp_get.toLowerCase().includes(q)) ||
     (s.sp_iud && s.sp_iud.toLowerCase().includes(q))
   );
 
   const popErrors = getAllPopErrors().filter(e =>
-    e.code.toLowerCase().includes(q) ||
-    e.title.toLowerCase().includes(q) ||
-    e.root_cause.toLowerCase().includes(q) ||
-    e.fast_fix.toLowerCase().includes(q)
+    (e.code || '').toLowerCase().includes(q) ||
+    (e.title || '').toLowerCase().includes(q) ||
+    (e.root_cause || '').toLowerCase().includes(q) ||
+    (e.fast_fix || '').toLowerCase().includes(q)
   );
 
   const gwForms = getAllGwForms().filter(f =>
-    f.id.toLowerCase().includes(q) ||
-    f.name.toLowerCase().includes(q) ||
-    (f.description && f.description.toLowerCase().includes(q))
+    (f.id || '').toLowerCase().includes(q) ||
+    (f.name || '').toLowerCase().includes(q) ||
+    (f.description || '').toLowerCase().includes(q)
   );
 
   const databases = getAllDatabases().filter(d =>
-    d.name.toLowerCase().includes(q) ||
-    d.profile.toLowerCase().includes(q) ||
-    d.role.toLowerCase().includes(q)
+    (d.name || '').toLowerCase().includes(q) ||
+    (d.profile || '').toLowerCase().includes(q) ||
+    (d.role || '').toLowerCase().includes(q) ||
+    (d.description || '').toLowerCase().includes(q)
   );
 
   return {
