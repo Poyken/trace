@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Send, Bot, User, Copy, Check, Sparkles, AlertCircle, Wrench, ShieldCheck, ArrowRight } from 'lucide-react';
 import { ChatMessage } from '@/lib/types';
+import SqlApprovalModal from '@/components/SqlApprovalModal';
 
 interface CopilotTabProps {
   onNavigateToDiagnostics?: (type: string, target: string) => void;
@@ -24,6 +25,7 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [approvalModal, setApprovalModal] = useState<{ isOpen: boolean; sql: string; title: string } | null>(null);
 
   const samplePrompts = [
     { label: 'Lỗi B530 Already completed', text: 'Lot VVQR232R710618 bị lỗi Already completed in MES trên B530' },
@@ -168,15 +170,28 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
 
                       {msg.structuredResponse.hotfixSql && (
                         <div className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 space-y-2">
-                          <div className="flex justify-between items-center text-xs text-slate-600 dark:text-slate-400 font-semibold">
+                          <div className="flex flex-wrap justify-between items-center gap-2 text-xs text-slate-600 dark:text-slate-400 font-semibold">
                             <span>4. SQL Hotfix Chuẩn (BEGIN TRAN...ROLLBACK)</span>
-                            <button
-                              onClick={() => copyToClipboard(msg.structuredResponse?.hotfixSql || '', msg.id)}
-                              className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-cyan-700 dark:text-cyan-400 rounded-lg transition font-mono text-[11px] border border-slate-200 dark:border-slate-700 shadow-sm"
-                            >
-                              {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                              {copiedId === msg.id ? 'Đã copy' : 'Copy SQL'}
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => copyToClipboard(msg.structuredResponse?.hotfixSql || '', msg.id)}
+                                className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-cyan-700 dark:text-cyan-400 rounded-lg transition font-mono text-[11px] border border-slate-200 dark:border-slate-700 shadow-sm"
+                              >
+                                {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                {copiedId === msg.id ? 'Đã copy' : 'Copy SQL'}
+                              </button>
+                              <button
+                                onClick={() => setApprovalModal({
+                                  isOpen: true,
+                                  sql: msg.structuredResponse?.hotfixSql || '',
+                                  title: `Duyệt & Sửa Hotfix SQL (Sự Cố: ${msg.id})`
+                                })}
+                                className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white rounded-lg transition font-medium text-[11px] shadow-sm shadow-rose-500/20"
+                              >
+                                <ShieldCheck className="w-3.5 h-3.5" />
+                                <span>Duyệt & Sửa SQL Trực Tiếp</span>
+                              </button>
+                            </div>
                           </div>
                           <pre className="p-3 rounded-lg bg-slate-900 text-slate-100 font-mono text-xs overflow-x-auto border border-slate-800 shadow-inner">
                             <code>{msg.structuredResponse.hotfixSql}</code>
@@ -185,7 +200,28 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
                       )}
                     </div>
                   ) : (
-                    <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                    <div className="space-y-3">
+                      <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                      {(msg.content.includes('BEGIN TRAN') || msg.content.includes('UPDATE ') || msg.content.includes('DELETE ') || msg.content.includes('INSERT INTO ')) && (
+                        <div className="pt-2 border-t border-slate-200 dark:border-slate-800/80 flex justify-end">
+                          <button
+                            onClick={() => {
+                              const match = msg.content.match(/```(?:sql)?\s*([\s\S]*?)```/i);
+                              const targetSql = match ? match[1].trim() : msg.content;
+                              setApprovalModal({
+                                isOpen: true,
+                                sql: targetSql,
+                                title: 'Duyệt & Sửa Lệnh SQL Từ Phản Hồi Chat'
+                              });
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white rounded-xl text-xs font-semibold transition shadow-md shadow-rose-500/20"
+                          >
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                            <span>Duyệt & Sửa SQL Trong Lời Thoại</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   {/* Quick Action Buttons */}
@@ -273,6 +309,17 @@ Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chu�
           </button>
         </form>
       </div>
+
+      {/* SQL Pre-Flight Approval & Customization Modal */}
+      {approvalModal && (
+        <SqlApprovalModal
+          isOpen={approvalModal.isOpen}
+          onClose={() => setApprovalModal(null)}
+          title={approvalModal.title}
+          sql={approvalModal.sql}
+          targetDb="SmartFactoryV2"
+        />
+      )}
     </div>
   );
 }

@@ -32,32 +32,6 @@ export default function DashboardTab() {
     fetchHealth();
   }, []);
 
-  const handleUnlockMachine = async (machine: string) => {
-    try {
-      const res = await fetch('/api/unlock', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ machine })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUnlockMessage(data.message);
-        // Remove from list
-        setHealth(prev => ({
-          ...prev,
-          activeEquipmentLocks: {
-            ...prev.activeEquipmentLocks,
-            count: Math.max(0, prev.activeEquipmentLocks.count - 1),
-            machines: prev.activeEquipmentLocks.machines.filter(m => m !== machine)
-          }
-        }));
-        setTimeout(() => setUnlockMessage(null), 4000);
-      }
-    } catch (e) {
-      setUnlockMessage('Lỗi mở khóa: ' + (e as Error).message);
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Top action bar */}
