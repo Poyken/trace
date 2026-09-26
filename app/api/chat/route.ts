@@ -27,14 +27,20 @@ export async function POST(request: NextRequest) {
               contents: [{ role: 'user', parts: [{ text: message }] }],
               systemInstruction: {
                 parts: [{
-                  text: `Bạn là Trợ lý AI Vận Hành Cao Cấp của hệ thống Vinatech MES & POP (Author/ChangeUserID='vanduc').
+                  text: `Bạn là Antigravity - Trợ lý AI Vận Hành Cao Cấp của hệ thống Vinatech MES & POP (Author/ChangeUserID='vanduc').
 Nhiệm vụ: Chẩn đoán sự cố sản xuất, Kiosk POP, Groupware, ERP 5 CSDL dựa trên ma trận 97 màn hình MES và 38 mã lỗi POP Kiosk.
-QUY TẮC BẮT BUỘC: Mọi phân tích lỗi sự cố phải trả lời dứt khoát theo đúng chuẩn "4 Dòng Vàng":
-1. 🎯 Nguyên nhân gốc rễ (Root Cause): Màn hình, SP, cơ chế lỗi.
-2. 📍 Hiện trạng thực tế: Vị trí Lot, bảng kẹt.
-3. 🛠️ Cách OP tự xử lý trên giao diện (Workaround): Bước 1-2-3 cho công nhân.
-4. ⚡ SQL Hotfix chuẩn (Nếu IT can thiệp): Bọc BEGIN TRAN...ROLLBACK, ChangeUserID='vanduc'.
-Tuyệt đối tuân thủ EA Playbook (Rule 20) và Rule 21 (không query dò dẫm, luôn dùng tool).`
+QUY TẮC CỐT LÕI (BẤT BIẾN):
+- Mọi chẩn đoán sự cố sản xuất/Kiosk BẮT BUỘC trả lời chuẩn "4 DÒNG VÀNG":
+  1. 🎯 Nguyên nhân gốc rễ (Root Cause): Màn hình, SP, cơ chế lỗi.
+  2. 📍 Hiện trạng thực tế: Vị trí Lot, bảng kẹt.
+  3. 🛠️ Cách OP tự xử lý trên giao diện (Workaround): Bước 1-2-3 dứt khoát cho công nhân.
+  4. ⚡ SQL Hotfix chuẩn (Nếu IT can thiệp): Bọc BEGIN TRAN...ROLLBACK, gắn ChangeUserID='vanduc'.
+- 5 NGUYÊN TẮC BẤT BIẾN EA PLAYBOOK (RULE 20):
+  1. Đổi máy nhầm Kiosk: Bắt buộc UPDATE CẢ 2 BẢNG (STB_ProdRouteHist VÀ MongoToMesPerformance).
+  2. Lỗi 'Already completed': Do WinForm sinh sẵn dòng kế tiếp, xóa dòng thừa trong STB_ProdRouteHist & STB_ProdRouteWorkerHist.
+  3. Nút Cắt điện cực mờ: Do MaterialThickness < 100 trong STB_MaterialMaster.
+  4. Nạp cuộn BTP: Tối đa 3 LOTNO cho 1 mã cắt.
+  5. Kẹt máy ACTIVE POP: Giải phóng qua lệnh unlock hoặc UPDATE STB_MachineRunningStatus về IDLE.`
                 }]
               }
             })
@@ -64,11 +70,11 @@ Tuyệt đối tuân thủ EA Playbook (Rule 20) và Rule 21 (không query dò d
 
     // Check if matched a specific Screen ID (e.g. B530, B781, F330)
     const screenMatch = message.match(/[A-Z]\d{3}/i);
-    let matchedScreen = screenMatch ? getAllScreens().find(s => s.id.toUpperCase() === screenMatch[0].toUpperCase()) : null;
+    let matchedScreen = screenMatch ? getAllScreens().find(s => (s.id || '').toUpperCase() === screenMatch[0].toUpperCase()) : null;
 
     // Check if matched a specific POP Error Code (e.g. POP-ERR-09, POP-ERR-37)
     const popErrMatch = message.match(/POP-ERR-\d{2}/i);
-    let matchedPopErr = popErrMatch ? getAllPopErrors().find(e => e.code.toUpperCase() === popErrMatch[0].toUpperCase()) : null;
+    let matchedPopErr = popErrMatch ? getAllPopErrors().find(e => (e.code || '').toUpperCase() === popErrMatch[0].toUpperCase()) : null;
 
     if (!matchedPopErr && searchHits?.popErrors?.length) {
       matchedPopErr = searchHits.popErrors[0];
@@ -82,13 +88,13 @@ Tuyệt đối tuân thủ EA Playbook (Rule 20) và Rule 21 (không query dò d
 
     if (matchedPopErr) {
       const hotfixSql = matchedPopErr.fast_fix.includes('DELETE') || matchedPopErr.fast_fix.includes('UPDATE')
-        ? `-- Hotfix tu POP-ERR: ${matchedPopErr.code}\nBEGIN TRAN\n  ${matchedPopErr.fast_fix.replace(/<Lots>/g, targetLot)}\nROLLBACK TRAN;\n-- COMMIT TRAN;`
-        : `-- Tra cuu & Khac phuc theo Rule 20\nBEGIN TRAN\n  UPDATE VINATECH_POP.dbo.MongoToMesPerformance SET MachineCode = '${targetMachine}' WHERE LotID = '${targetLot}';\nROLLBACK TRAN;\n-- COMMIT TRAN;`;
+        ? `-- Hotfix tu POP-ERR: ${matchedPopErr.code}\nBEGIN TRAN;\n  ${matchedPopErr.fast_fix.replace(/<Lots>/g, targetLot).replace(/<Lot>/g, targetLot)}\nROLLBACK TRAN;\n-- COMMIT TRAN;`
+        : `-- Tra cuu & Khac phuc theo Rule 20\nBEGIN TRAN;\n  UPDATE VINATECH_POP.dbo.MongoToMesPerformance SET MachineCode = '${targetMachine}' WHERE LotID = '${targetLot}';\nROLLBACK TRAN;\n-- COMMIT TRAN;`;
 
       const structured = {
         rootCause: `[${matchedPopErr.code}] ${matchedPopErr.title}: ${matchedPopErr.root_cause}`,
-        currentStatus: `Đối tượng liên quan: ${targetLot}. Tra cứu từ Ma Trận L1 Cache POP_MATRIX (38 mã lỗi Kiosk).`,
-        workaround: `OP thao tác theo hướng dẫn Kiosk: ${matchedPopErr.fast_fix.split('—')[0]}`,
+        currentStatus: `Đối tượng liên quan: ${targetLot}. Tra cứu tức thì từ Ma Trận L1 Cache POP_MATRIX (38 mã lỗi Kiosk).`,
+        workaround: `OP thao tác theo hướng dẫn: ${matchedPopErr.fast_fix.split('—')[0]}`,
         hotfixSql
       };
 
@@ -123,7 +129,7 @@ ${structured.hotfixSql}
     if (matchedScreen) {
       const bugKeys = Object.keys(matchedScreen.common_bugs);
       const bugDesc = bugKeys.length > 0 ? matchedScreen.common_bugs[bugKeys[0]] : 'Lỗi phát sinh trong quá trình chốt dữ liệu công đoạn.';
-      const hotfixSql = matchedScreen.fix_template || `-- Hotfix man hinh ${matchedScreen.id}\nBEGIN TRAN\n  UPDATE SmartFactoryV2.dbo.STB_ProdRouteHist SET ChangeUserID = 'vanduc', ChangeDate = GETDATE() WHERE LotID = '${targetLot}';\nROLLBACK TRAN;\n-- COMMIT TRAN;`;
+      const hotfixSql = matchedScreen.fix_template || `-- Hotfix man hinh ${matchedScreen.id}\nBEGIN TRAN;\n  UPDATE SmartFactoryV2.dbo.STB_ProdRouteHist SET ChangeUserID = 'vanduc', ChangeDate = GETDATE() WHERE LotID = '${targetLot}';\nROLLBACK TRAN;\n-- COMMIT TRAN;`;
 
       const structured = {
         rootCause: `Màn hình ${matchedScreen.id} - ${matchedScreen.name} (Module: ${matchedScreen.module}). SP gọi: ${matchedScreen.sp_get || matchedScreen.sp_iud}. ${bugDesc}`,
@@ -196,13 +202,21 @@ ${structured.hotfixSql}
       });
     }
 
-    // Default friendly domain assistant response
-    const defaultReply = `Chào anh **Đức**, Copilot đã ghi nhận yêu cầu: "${message}".
+    // Default friendly domain assistant response with comprehensive prompt intelligence
+    const defaultReply = `Chào anh **Đức (Kỹ sư IT - EA Team)**! Copilot đã phân tích yêu cầu: "${message}".
 
-Hệ thống đã nạp đầy đủ ma trận **97 màn hình MES**, **38 mã lỗi POP Kiosk**, **25 biểu mẫu Groupware**, và **15 CSDL**:
-- Nhập bất kỳ mã màn hình nào (VD: \`B530\`, \`B540\`, \`B552\`, \`B781\`, \`B782\`, \`F330\`, \`B598\`, \`HN523\`) để tra cứu Stored Procedure, bảng liên quan và giải pháp sửa lỗi.
-- Nhập mã lỗi POP Kiosk (VD: \`POP-ERR-09\`, \`POP-ERR-37\`, \`POP-ERR-38\`) để nhận ngay hướng dẫn xử lý và Hotfix bọc Transaction.
-- Nhập mã Lot (VD: \`VVQR...\`) để chạy Trace 360°.`;
+Hệ thống điều hành sản xuất được trang bị:
+1. **Ma Trận L1 Cache:** 97 màn hình WinForm, 38 mã lỗi POP Kiosk, 25 biểu mẫu Groupware, 15 CSDL.
+2. **5 Nguyên Tắc Bất Biến EA Playbook (Rule 20):**
+   - Đổi máy Kiosk update đồng thời 2 bảng (\`STB_ProdRouteHist\` & \`MongoToMesPerformance\`).
+   - Lỗi 'Already completed' xóa dòng thừa \`CompleteRoute IS NULL\`.
+   - Cắt điện cực mờ do độ dày \`< 100\`.
+   - Nạp cuộn BTP tối đa 3 LOTNO.
+   - Giải phóng máy kẹt ACTIVE tức thời 1-Click.
+3. **Thao tác nhanh:**
+   - Gõ mã Lot (\`VVQR...\`) hoặc PO (\`2608...\`) để kích hoạt Trace 360°.
+   - Gõ mã màn hình (\`B530\`, \`B782\`, \`B552\`) để xem Stored Procedure và giải pháp lỗi.
+   - Gõ mã thiết bị (\`VVMHY130\`) để mở khóa thiết bị.`;
 
     return NextResponse.json({
       reply: defaultReply,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import CopilotTab from '@/components/CopilotTab';
 import DashboardTab from '@/components/DashboardTab';
@@ -12,11 +12,37 @@ import CommandPalette from '@/components/CommandPalette';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('copilot');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [diagInitial, setDiagInitial] = useState<{ type: string; target: string }>({
     type: 'trace',
     target: 'VVQR232R710618'
   });
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('vinatech_theme') as 'dark' | 'light';
+    if (savedTheme) {
+      setTheme(savedTheme);
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem('vinatech_theme', nextTheme);
+    if (nextTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
 
   const handleNavigateToDiagnostics = (type: string, target: string) => {
     setDiagInitial({ type, target });
@@ -34,11 +60,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
-      {/* Dynamic ambient background glow */}
+    <div className="min-h-screen flex flex-col transition-colors duration-300 selection:bg-cyan-500/30 selection:text-cyan-200">
+      {/* Ambient background glow (Dark mode) / Subtle mesh (Light mode) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-[20%] w-[550px] h-[550px] rounded-full bg-cyan-600/10 blur-[130px] animate-pulse-glow" />
-        <div className="absolute top-[40%] right-[10%] w-[650px] h-[650px] rounded-full bg-indigo-600/10 blur-[160px] animate-pulse-glow" />
+        <div className="absolute top-[-10%] left-[20%] w-[550px] h-[550px] rounded-full bg-cyan-500/10 dark:bg-cyan-600/10 blur-[130px] animate-pulse-glow" />
+        <div className="absolute top-[40%] right-[10%] w-[650px] h-[650px] rounded-full bg-indigo-500/10 dark:bg-indigo-600/10 blur-[160px] animate-pulse-glow" />
       </div>
 
       {/* Main Header */}
@@ -46,6 +72,8 @@ export default function Home() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
 
       {/* Command Palette Modal (Ctrl + K) */}
@@ -73,9 +101,9 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/80 py-4 relative z-10 text-center text-xs text-slate-500">
+      <footer className="border-t border-slate-200 dark:border-slate-900 bg-white/80 dark:bg-slate-950/80 py-4 relative z-10 text-center text-xs text-slate-500 dark:text-slate-500 transition-colors">
         <p>
-          Hệ Thống Vinatech MES Operations Copilot • Tác giả & Kỹ sư Vận hành: <span className="text-cyan-400 font-mono">Nguyen Van Duc (vanduc)</span> • Vercel Edge Cloud
+          Hệ Thống Vinatech MES Operations Copilot • Tác giả & Kỹ sư Vận hành: <span className="text-cyan-600 dark:text-cyan-400 font-mono">Nguyen Van Duc (vanduc)</span> • Vercel Edge Cloud
         </p>
       </footer>
     </div>
