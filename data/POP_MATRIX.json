@@ -1,0 +1,705 @@
+﻿{
+  "version": "2.1.0",
+  "updated_at": "2026-09-25 17:00:00",
+  "description": "L1 Ultra-Fast JSON Cache for Vinatech POP Web Ecosystem (31 Lines, 11 Routes, 25 Errors & Fast CLI Mapping)",
+  "summary": {
+    "total_lines": 31,
+    "pass_lines": 6,
+    "warn_lines": 11,
+    "fail_lines": 14,
+    "database_profiles": [
+      "SmartFactoryV2",
+      "VINATECH_POP",
+      "SmartFramework",
+      "VINATECH_WEBSOCKET",
+      "MongoDB"
+    ]
+  },
+  "lines": {
+    "VVC-01": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "PASS",
+      "note": "San sang cat WinForm 100%"
+    },
+    "VVC-02": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "PASS",
+      "note": "San sang cat WinForm 100%"
+    },
+    "VVC-03": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE trong VINA_LINE_PROD_MODE"
+    },
+    "VVC-04": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE trong VINA_LINE_PROD_MODE"
+    },
+    "VVC-05": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "PASS",
+      "note": "San sang cat WinForm 100%"
+    },
+    "VVC-06": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "PASS",
+      "note": "San sang cat WinForm 100%"
+    },
+    "VVC-07": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "PASS",
+      "note": "San sang cat WinForm 100%"
+    },
+    "VVC-08": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE trong VINA_LINE_PROD_MODE"
+    },
+    "VVC-09": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE trong VINA_LINE_PROD_MODE"
+    },
+    "VVC-10": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Co 2 may ket khoa ACTIVE cu (MappingID 1453, 1679). Chay .\\mes.ps1 release-machines -Target VVC-10 -Force"
+    },
+    "VVC-11": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Ket 37 ban ghi sync trong MongoToMesPerformance (IsTransferred = 0) va 5 may ket"
+    },
+    "VVC-12": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "PASS",
+      "note": "San sang cat WinForm 100%"
+    },
+    "VVC-13": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Co 6 may ket khoa ACTIVE cu can release"
+    },
+    "VVC-14": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE trong VINA_LINE_PROD_MODE"
+    },
+    "VVC-16": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE trong VINA_LINE_PROD_MODE"
+    },
+    "VVC-17": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Co 1 may ket khoa ACTIVE cu"
+    },
+    "VVC-18": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Co 3 may ket khoa ACTIVE cu"
+    },
+    "VVC-22": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE trong VINA_LINE_PROD_MODE va co 1 may ket"
+    },
+    "VVC-23": {
+      "factory": "HN",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE trong VINA_LINE_PROD_MODE"
+    },
+    "TCX1": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 9,
+      "winding_slots": 5,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Moi co 9 slots (thieu 1 slot)"
+    },
+    "TCX2": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 9,
+      "winding_slots": 5,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Moi co 9 slots va co 2 may ket"
+    },
+    "VVHYC-01": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 11,
+      "winding_slots": 6,
+      "assembly_slots": 4,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Du 1 slot (11 slots)"
+    },
+    "VVHYC-02": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 9,
+      "winding_slots": 5,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Moi co 9 slots (thieu 1 slot)"
+    },
+    "VVHYC-03": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE va co 1 may ket"
+    },
+    "VVHYC-04": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE trong VINA_LINE_PROD_MODE"
+    },
+    "VVHYC-09": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 9,
+      "winding_slots": 5,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Moi co 9 slots (thieu 1 slot)"
+    },
+    "VVHYC-10": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 9,
+      "winding_slots": 5,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Moi co 9 slots (thieu 1 slot)"
+    },
+    "VVHYC-13": {
+      "factory": "HY",
+      "input_mode": "BOM",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Cau hinh nham INPUT_MODE = 'BOM' thay vi 'GROUP'"
+    },
+    "VVHYC-15": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE trong VINA_LINE_PROD_MODE"
+    },
+    "VVHYC-16": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "SUBTRACT",
+      "total_slots": 11,
+      "winding_slots": 6,
+      "assembly_slots": 4,
+      "sleeving_slots": 1,
+      "status": "WARN",
+      "note": "Du 1 slot (11 slots) va co 1 may ket"
+    },
+    "VVHYC-17": {
+      "factory": "HY",
+      "input_mode": "GROUP",
+      "prod_mode": "THIEU",
+      "total_slots": 10,
+      "winding_slots": 6,
+      "assembly_slots": 3,
+      "sleeving_slots": 1,
+      "status": "FAIL",
+      "note": "Thieu PROD_MODE va co 2 may ket"
+    }
+  },
+  "routes": {
+    "/pop/screen": {
+      "name": "Kiosk San Xuat (Production Kiosk)",
+      "description": "Giao dien man hinh cam ung xhuong san xuat: Nap NVL 10 slot, gan may, chot san luong Winding, Assembly, Sleeving",
+      "api_endpoints": [
+        "POST /api/pop/screen/selectList",
+        "POST /api/pop/screen/saveMaterial",
+        "POST /api/pop/screen/saveProd",
+        "POST /api/pop/screen/savePacking"
+      ],
+      "tables": [
+        "SmartFactoryV2.dbo.MongoToMesPerformance",
+        "SmartFactoryV2.dbo.STB_SetInfo",
+        "SmartFactoryV2.dbo.STB_ProdRouteHist",
+        "SmartFactoryV2.dbo.STB_MaterialLotInfo",
+        "VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING",
+        "VINATECH_POP.dbo.VINA_KIOSK_LOG"
+      ],
+      "equivalent_winform": [
+        "B530",
+        "B540",
+        "B523",
+        "B782",
+        "B552"
+      ]
+    },
+    "/pop/quality": {
+      "name": "Kiem Soat Chat Luong (Quality Inspection)",
+      "description": "Tu kiem tra In-Line QC, kiem tra dau vao IQC, kiem tra cong doan PQC, kiem tra xuat xuong OQC/FOQC",
+      "api_endpoints": [
+        "POST /api/quality/selectDefectList",
+        "POST /api/quality/saveDefect",
+        "POST /api/quality/saveInspection"
+      ],
+      "tables": [
+        "SmartFactoryV2.dbo.STB_DefectRepairInfo",
+        "SmartFactoryV2.dbo.STB_DefectSummary",
+        "SmartFactoryV2.dbo.MongoToMesDefect",
+        "VINATECH_POP.dbo.VINA_QUALITY_ITEM_EQUIPMENT_MAP"
+      ],
+      "equivalent_winform": [
+        "C510",
+        "C512",
+        "C514",
+        "C516",
+        "C518"
+      ]
+    },
+    "/equipmentData/data/list": {
+      "name": "Giam Sat Thiet Bi IoT (Equipment IoT Realtime)",
+      "description": "Che do The Card View & Che do Bang Flat View giam sat nhiet do, ap suat, toc do, dien ap tu PLC",
+      "api_endpoints": [
+        "GET /api/equipment/data/list",
+        "GET /download/vinatechEquipmentDataSetup.exe"
+      ],
+      "tables": [
+        "VINATECH_POP.dbo.VINA_EQUIPMENT_SETTING",
+        "MongoDB Time-Series Collections"
+      ],
+      "equivalent_winform": [
+        "M110",
+        "M120"
+      ]
+    },
+    "/equipmentData/log/list": {
+      "name": "Nhat Ky Thu Thap Du Lieu Thiet Bi (Equipment Log)",
+      "description": "Kiem tra tab Complete Logs va Error Logs, chan doan mat tin hieu socket, du lieu out of range PLC",
+      "api_endpoints": [
+        "GET /api/equipment/log/list"
+      ],
+      "tables": [
+        "VINATECH_POP.dbo.VINA_PLC_BASELINE",
+        "VINATECH_POP.dbo.VINA_EQUIPMENT_REMAINDER",
+        "VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING"
+      ],
+      "equivalent_winform": [
+        "M210"
+      ]
+    },
+    "/dashboard/electrodeStatus": {
+      "name": "Bao Cao Tien Do Dien Cuc (Electrode WIP & Stock)",
+      "description": "Theo doi tien do va ton kho ban thanh pham cuon dien cuc",
+      "tables": [
+        "SmartFactoryV2.dbo.STB_MaterialStock",
+        "STB_MaterialLotInfo"
+      ],
+      "equivalent_winform": [
+        "B552",
+        "B442"
+      ]
+    },
+    "/dashboard/assemblyTrace": {
+      "name": "Truy Vet Pha He Lap Rap (Assembly Traceability)",
+      "description": "Truy vet phan cap tu cuon dien cuc, linh kien nvl den thung dong goi thanh pham",
+      "tables": [
+        "SmartFactoryV2.dbo.STB_SetInfo",
+        "STB_ProdRouteHist",
+        "STB_MaterialLotInfo"
+      ],
+      "equivalent_winform": [
+        "B782",
+        "B785"
+      ]
+    },
+    "/popSetting/interlockSetting": {
+      "name": "Quan Ly Khoa Lien Dong Interlock (Interlock Management)",
+      "description": "Cai dat 3 khoa FIFO Lot Order, Min Dwell Time, Max Dwell Time va Tab Quan tri mo khoa Admin Release",
+      "tables": [
+        "VINATECH_POP.dbo.VINA_INTERLOCK_SETTING",
+        "VINATECH_POP.dbo.VINA_INTERLOCK_RELEASE_LOG",
+        "VINATECH_POP.dbo.VINA_PACK_GRADE_ITEM",
+        "VINATECH_POP.dbo.VINA_ROUTE_DOC",
+        "VINATECH_POP.dbo.VINA_ROUTE_TEST_SETTING"
+      ]
+    },
+    "/popSetting/lineProdMode": {
+      "name": "Che Do San Luong Line (Line Production Mode)",
+      "description": "Cau hinh SUBTRACT (Dat = Ke hoach - Phe) vs ADD (Nhap tay truc tiep)",
+      "tables": [
+        "VINATECH_POP.dbo.VINA_LINE_PROD_MODE",
+        "SmartFactoryV2.dbo.MongoToMesPerformance"
+      ]
+    },
+    "/systemAdmin/qualityAdmin": {
+      "name": "Quan Tri Chat Luong & Hoan Tac (Quality Admin Reopen)",
+      "description": "Phe duyet hoan tac bien ban QC kiem tra (Reopen Request), rollback co HOLD va phe pham MES",
+      "tables": [
+        "VINATECH_POP.dbo.VINA_REOPEN_REQUEST",
+        "VINATECH_POP.dbo.VINA_REOPEN_POLICY",
+        "SmartFactoryV2.dbo.STB_CommInspDocMaster",
+        "SmartFactoryV2.dbo.STB_HoldingMaster",
+        "SmartFactoryV2.dbo.STB_DefectRepairInfo"
+      ]
+    },
+    "/dataCollection/pcMacDashboard": {
+      "name": "Giam Sat PC Bien & Cap Nhat Tu Xa (Edge PC Monitoring)",
+      "description": "Cockpit giam sat 58 PC thu thap PLC, restart va update agent v1.2.33 tu xa",
+      "tables": [
+        "VINATECH_POP.dbo.VINA_PC_MAC",
+        "VINATECH_POP.dbo.VINA_EQUIPMENT_SETTING",
+        "MongoDB Time-Series"
+      ]
+    },
+    "/dataCollection/equipmentSetting": {
+      "name": "Cai Dat Thiet Bi & Tu Dong Hoa PLC (Equipment Automation)",
+      "description": "Bat co EQUIPMENT_SETTING_AUTO_PERF = Y de PLC tu nhan dien Lot va chot san luong khong can bam Start",
+      "tables": [
+        "VINATECH_POP.dbo.VINA_EQUIPMENT_SETTING",
+        "SmartFactoryV2.dbo.MongoToMesPerformance"
+      ]
+    }
+  },
+  "top_errors": {
+    "POP-ERR-09": {
+      "title": "This route is already completed in MES / Chốt Cấp Thứ Aging (500+ lần)",
+      "root_cause": "Khi chốt công đoạn trước trên MES WinForm, SP usp_DoProcessProdRouteHistForCalc_SmartApp_VNT tự động clone dòng công đoạn kế tiếp với CompleteRoute IS NULL. Chuyển sang Web POP Kiosk (Aging V-26_HY), API Kiosk hiểu lầm là đã chốt trên MES nên chặn không cho tạo mới.",
+      "fast_fix": "Xóa dòng clone tự sinh thừa: DELETE FROM STB_ProdRouteHist WHERE ControlNo IN (...) AND CompleteRoute IS NULL (hoặc chạy .\\mes.ps1 fix-pop-clone -Lots '<Lots>' -Deploy)"
+    },
+    "POP-ERR-16": {
+      "title": "Tem thung in tu POP bi co ngan ma vach PackingID (Scanner khong doc duoc)",
+      "root_cause": "Kiosk POP thieu engine sinh PackingID chuan 11 ky tu (PKQR1900142). DevExpress AutoModule=true lam co cum thanh vach Code 128",
+      "fast_fix": "Chay template sql/template_GENERATE_POP_PACKING_ID.sql hoac in lai tren WinForm B523/B528"
+    },
+    "POP-ERR-19": {
+      "title": "Khong tim thay LOT trong kho khi nap cuon dien cuc / BOM",
+      "root_cause": "Kho chua quet xuat kho tren WMS hoac kho luu tru khong khop voi Line kho",
+      "fast_fix": "Kiem tra STB_MaterialLotInfo.MaterialWarehouseCode va StockQty tren STB_MaterialStock"
+    },
+    "POP-ERR-20": {
+      "title": "Kiosk thieu thiet bi / An may tai modal Xac nhan Ket thuc",
+      "root_cause": "May bi ket status MAPPING_STATUS='ACTIVE' tu DayPlan cu trong VINA_EQUIPMENT_MAPPING do OP khong bam Huy gan",
+      "fast_fix": "Chay .\\mes.ps1 release-machines -Target <Line> -Force hoac sql/routine_RELEASE_ORPHAN_MACHINE_LOCKS.sql"
+    },
+    "POP-ERR-21": {
+      "title": "Ma loi phe tren POP Kiosk khong hien hoac STB_SetInfo.DefectQty bi thieu",
+      "root_cause": "Three-Valued Logic: Cot IsDelete va RepairQty bi NULL do thieu constraint default trong STB_DefectRepairInfo",
+      "fast_fix": "Chay Template 11 (POP_KB_03): UPDATE STB_DefectRepairInfo SET IsDelete='0', RepairQty=0 WHERE ControlNo='<ControlNo>' AND (IsDelete IS NULL OR RepairQty IS NULL)"
+    },
+    "POP-ERR-22": {
+      "title": "Already transferred to MES. Cannot modify (162 lan)",
+      "root_cause": "Ban ghi san luong hoac phe da duoc luong ngam dong bo sang MES (IsTransferred=1), Kiosk khoa quyen sua/xoa",
+      "fast_fix": "Bao IT dieu chinh truc tiep tren MES WinForm hoac chay Hotfix rollback/update bọc BEGIN TRAN...ROLLBACK"
+    },
+    "POP-ERR-23": {
+      "title": "실적이 없는 공정입니다. 실적 등록 후 추가하세요 (120 lan)",
+      "root_cause": "Chua dang ky san luong tot (Good Qty) ma da bam them phe pham hoac ket thuc cong doan",
+      "fast_fix": "Nhap so luong san xuat tot truoc vao o yangpum (Good Qty), sau do moi mo modal phe pham va bam Hoan tat"
+    },
+    "POP-ERR-24": {
+      "title": "This roll has already been used for 2 product LOTs. Input blocked (100 lan)",
+      "root_cause": "Rang buoc toan ven nghiep vu: 1 cuon BTP dien cuc chi duoc phep cat/nap toi da cho 2 LOT san pham, quet vao LOT thu 3 bi chan",
+      "fast_fix": "Doi sang cuon dien cuc moi chua vuot qua 2 LOT. Khong co quet ep cuon da dung du dinh muc"
+    },
+    "POP-ERR-25": {
+      "title": "코팅 생산수량 등록 후 불량등록이 가능합니다 (73 lan)",
+      "root_cause": "Trinh tu bat buoc tai cong doan Coating: He thong yeu cau phai ghi nhan chieu dai Coating truoc khi dang ky phe",
+      "fast_fix": "Nhap met mang Coating tot truoc, sau do moi bam dang ky cac ma phe pham me tron/trang phu"
+    },
+    "POP-ERR-26": {
+      "title": "작업자를 먼저 지정해 주세요 (60 lan)",
+      "root_cause": "Chua chon hoac chua quet the nhan vien kiem tra (Inspector) truoc khi luu bien ban PQC/In-Line QC",
+      "fast_fix": "Quet the nhan vien hoac chon ma cong nhan kiem tra tai o Inspector truoc khi bam Luu"
+    },
+    "POP-ERR-27": {
+      "title": "믹싱 공정이 완료되지 않았습니다 (40 lan)",
+      "root_cause": "Me tron Mixing chua nap du 100% cac ma NVL theo dinh muc recipe (con ton dong NVL chua quet)",
+      "fast_fix": "Mo danh sach NVL Mixing, quet bo sung day du cac ma NVL con thieu roi moi chot san luong Coating"
+    },
+    "POP-ERR-28": {
+      "title": "호일 부족: 코팅 생산수량 > 투입 호일 가용 길이 (15 lan)",
+      "root_cause": "Can bang vat tu: Chieu dai mang Coating dang ky vuot qua tong chieu dai la Foil kim loai da nap vao may",
+      "fast_fix": "Quet nap them cuon Foil kim loai bo sung vao o NVL de bu dap chieu dai thieu hut"
+    },
+    "POP-ERR-SYNC": {
+      "title": "Kẹt đồng bộ POP sang MES (MongoToMesPerformance)",
+      "root_cause": "Dữ liệu chốt trên Web có IsTransferred = 0 hoặc IsDone = 1 chưa được luồng ngầm đẩy vào STB_ProdRouteHist",
+      "fast_fix": "Chạy thủ tục tools/sql/procedures/usp_VINA_SyncPopToMes_SingleLot.sql @Barcode = '<Barcode>'"
+    },
+    "POP-CASE-01": {
+      "title": "Cắt đóng gói điện cực báo sai Line (Yêu cầu Line ElectrodeBN tại Bắc Ninh)",
+      "root_cause": "Hệ thống POP yêu cầu Line cắt mặc định là ElectrodeBN với nhà máy Bắc Ninh. STB_DayProdPlan của Lot đang bị gán sai Line",
+      "fast_fix": "SELECT SI.DayPlanNo, DPP.LineCode FROM STB_SetInfo SI JOIN STB_DayProdPlan DPP ON SI.DayPlanNo=DPP.DayPlanNo WHERE Barcode='<Lot>'. UPDATE STB_DayProdPlan SET LineCode='ElectrodeBN'"
+    },
+    "POP-CASE-02": {
+      "title": "Chưa thêm mã lỗi ứng với từng công đoạn (Thiếu bảng phế phẩm Kiosk)",
+      "root_cause": "Công đoạn mới chưa được đăng ký trong STB_DefectGroup hoặc chưa clone danh mục mã lỗi sang STB_DefectInfo",
+      "fast_fix": "Chạy .\\mes.ps1 new-fix 'CLONE_DEFECT' -Template clone-defect (Đăng ký STB_DefectGroup và clone STB_DefectInfo)"
+    },
+    "POP-CASE-03": {
+      "title": "Lỗi khi dùng MES rồi quay sang dùng POP (Xung đột CompleteRoute = 1 vs NULL)",
+      "root_cause": "MES tự sinh dòng công đoạn kế tiếp với CompleteRoute = 1, POP kiểm tra thấy có dòng sẵn nên báo Already completed",
+      "fast_fix": "Xóa dòng thừa trong STB_ProdRouteHist và STB_ProdRouteWorkerHist (hoặc chạy .\\mes.ps1 fix-pop-clone -Lots '<Lot>' -Deploy)"
+    },
+    "POP-CASE-04": {
+      "title": "Không thể nạp 1 mã cắt điện cực từ 2 Lot trở lên (Ràng buộc tối đa 3 LOTNO)",
+      "root_cause": "Hệ thống khống chế 1 cuộn BTP điện cực chỉ được nạp tối đa 2 đến 3 LOTNO thành phẩm để chống âm kho và kiểm soát sai số",
+      "fast_fix": "Đổi sang cuộn điện cực mới còn tồn kho. Nếu cuộn cũ còn màng dài, báo Kỹ sư xưởng làm thủ tục tách mã phụ trên WinForm"
+    },
+    "POP-CASE-05": {
+      "title": "Không thể đóng gói được khi báo không có kho",
+      "root_cause": "CellLine chưa được cấu hình liên kết công đoạn đóng gói với kho thành phẩm đích trong Master",
+      "fast_fix": "Vào MES WinForm màn hình B230 gán công đoạn và kho đóng gói cho CellLine (tham khảo Line chuẩn TX1)"
+    },
+    "POP-CASE-06": {
+      "title": "Hạng mục tự kiểm PQC In-Line thiết lập nhầm công đoạn",
+      "root_cause": "Mã kiểm tra (V_H1_HY, V_H2_HY, V_WA_HY) bị cấu hình sai RouteCode trong tài liệu đo",
+      "fast_fix": "Cập nhật lại công đoạn trên màn hình C141 và chạy .\\mes.ps1 new-fix 'PQC_FIX' -Template pqc"
+    },
+    "POP-CASE-07": {
+      "title": "Báo hết tồn kho nguyên vật liệu khi nạp Kiosk",
+      "root_cause": "3 kịch bản: (1) Có NVL thay thế trong BOM, (2) Hàng sản xuất liên phân xưởng BN-HY cần đổi kho, (3) CurrentQty=0 trên F430",
+      "fast_fix": "TH1: Chạm icon thay thế NVL trên Kiosk. TH2: Làm phiếu chuyển kho F430. TH3: Kiểm tra STB_MaterialLotInfo.CurrentQty"
+    },
+    "POP-CASE-08": {
+      "title": "Tìm kiếm tồn kho cuộn điện cực khi không quét được mã Barcode",
+      "root_cause": "Cuộn bị rách tem, mờ mã vạch hoặc scanner Kiosk kén mã. Cần tìm cuộn qua modal tìm kiếm thủ công",
+      "fast_fix": "Kiểm tra điều kiện hiển thị modal: CompanyCode='VVT' AND IsSlitting=1 AND LotAttr01='SLITTING' AND CurrentQty>0 AND MaterialWarehouseCode khớp kho AND PlusMinus (+/-) đúng cực tính"
+    },
+    "POP-CASE-09": {
+      "title": "Tạo cưỡng chế tồn kho điện cực (Cuộn hỏng tem barcode / chưa vào kho)",
+      "root_cause": "Cuộn BTP từ Slitting chưa đồng bộ vào STB_MaterialLotInfo, rách tem hoặc thiếu cờ ModalVisible='Y'",
+      "fast_fix": "Chạy .\\mes.ps1 new-fix 'FORCE_ROLL' -Template force-stock (Cấp số STB_SerialRule và chèn STB_MaterialLotInfo với LotAttr01='SLITTING')"
+    },
+    "POP-CASE-10": {
+      "title": "Thiết lập cấu hình Slot NVL CellLine trên Kiosk POP",
+      "root_cause": "Cần cấu hình giao diện nạp NVL cho Line mới hoặc điều chỉnh thứ tự slot nạp",
+      "fast_fix": "Cấu hình bảng VINA_ASSEMBLY_GROUP_MODE và VINA_GROUP_INPUT_ROUTE trong CSDL VINATECH_POP theo ProductGroupCode của BOM"
+    },
+    "POP-CASE-11": {
+      "title": "Hủy đóng gói Box và hủy hoàn thành công đoạn (Phân quyền Rollback)",
+      "root_cause": "Công nhân thao tác nhầm muốn hủy Box hoặc hoàn tác lượt chốt, nhưng UI Kiosk giới hạn quyền",
+      "fast_fix": "Chỉ tài khoản Leader/IT Admin được ủy quyền mới có quyền hủy trên UI. Hoặc chạy .\\mes.ps1 fix-cancel-pack -Target '<Lot>'"
+    },
+    "POP-CASE-12": {
+      "title": "Nguyên vật liệu thay thế trong định mức BOM (Delegate Material Mismatch)",
+      "root_cause": "Mã NVL trong PO hết hàng hoặc có mã tương đương từ NCC khác, nhưng cấu hình DelegateMaterialCode trong STB_MaterialMaster bị gán lệch quy cách (ví dụ Tape 5mm GBTPPL-001 bị gán nhầm sang 10mm GBRBPL-003)",
+      "fast_fix": "Vào WinForm [A230] Material Master hoặc chạy SQL sửa DelegateMaterialCode trong STB_MaterialMaster. Kiosk POP bấm nút [Làm mới] để nhận lại mã đúng"
+    },
+    "POP-CASE-13": {
+      "title": "Lỗi khi ấn sang chế độ (+) nhập lượng hoàn thành thay vì (-) phế phẩm",
+      "root_cause": "Công nhân ấn nhầm dấu (+) ở phần nhập phế phẩm làm Kiosk chuyển sang nhập lượng hoàn thành, khi bấm kết thúc bị crash",
+      "fast_fix": "Chạy rollback lượt thao tác bằng .\\mes.ps1 fix-rollback để công nhân nhập lại dấu (-) cho đúng phân hệ phế phẩm"
+    },
+    "POP-CASE-14": {
+      "title": "Công đoạn hoàn thành trên MES tự sinh công đoạn kế tiếp khi POP chưa chốt",
+      "root_cause": "MES WinForm có cơ chế auto-clone dòng tiếp theo với CompleteRoute=1, làm Kiosk POP nhảy cóc công đoạn",
+      "fast_fix": "Chạy .\\mes.ps1 fix-rollback -Lots '<Lot>' -Route '<Route_Bị_Sinh_Sớm>' để xóa dòng thừa trước khi cho Kiosk chốt lại"
+    },
+    "POP-CASE-15": {
+      "title": "Lỗi chưa lưu độ nhớt ở công đoạn Trộn (Mixing)",
+      "root_cause": "Công nhân chưa nhập hoặc chưa lưu giá trị đo độ nhớt mẻ keo trước khi chốt sang Coating",
+      "fast_fix": "OP mở lại mẻ Mixing trên Kiosk, nhập giá trị độ nhớt đo thực tế và bấm Lưu trước khi hoàn tất"
+    },
+    "POP-CASE-16": {
+      "title": "Lỗi sửa tên máy / gán nhầm mã máy khi chốt sản lượng (RULE 20)",
+      "root_cause": "Công nhân chọn nhầm máy trên Kiosk (vd: VVMHY136 thay vì VVMHY130). Nếu chỉ sửa 1 bảng sẽ bị Worker ghi đè lại",
+      "fast_fix": "BẮT BUỘC UPDATE ĐỒNG THỜI 2 BẢNG: Chạy .\\mes.ps1 new-fix 'SWAP_MACHINE' -Template swap-machine"
+    },
+    "POP-CASE-17": {
+      "title": "Nút Button 'Cắt điện cực' bị mờ / không sáng để bấm cắt (RULE 20)",
+      "root_cause": "Logic an toàn hệ thống: Chặn nút Cắt nếu độ dày màng điện cực MaterialThickness < 100 trong STB_MaterialMaster",
+      "fast_fix": "Chạy .\\mes.ps1 new-fix 'FIX_THICK' -Template thick để kiểm tra và cập nhật MaterialThickness >= 100"
+    },
+    "POP-ERR-31": {
+      "title": "Lệch mốc sản lượng do chế độ SUBTRACT (Line Prod Mode)",
+      "root_cause": "Dây chuyền cấu hình SUBTRACT trong VINA_LINE_PROD_MODE (GoodQty = PlanQty - DefectQty). Công nhân dồn phế cuối ca hoặc kế hoạch Lot bị chỉnh sửa làm số lượng Đạt nhảy sai",
+      "fast_fix": "Nhắc OP báo phế ngay tức thời. Nếu phế biến thiên lớn chuyển Line sang 'ADD' trên /popSetting/lineProdMode. Nếu sửa mốc cập nhật đồng thời MongoToMesPerformance và STB_ProdRouteHist"
+    },
+    "POP-ERR-32": {
+      "title": "Kẹt khóa liên động vượt thời gian chờ (Interlock Max Dwell Time Block)",
+      "root_cause": "Lot nằm chờ giữa 2 công đoạn vượt quá số phút MAX_WAIT trong VINA_INTERLOCK_SETTING, hệ thống kích hoạt Interlock Block tự động",
+      "fast_fix": "QA xác nhận chất lượng Lot. IT vào /popSetting/interlockSetting -> Tab '관리자 해제' (Admin Release), nhập lý do và bấm Release (Ghi nhận VINA_INTERLOCK_RELEASE_LOG với Author vanduc)"
+    },
+    "POP-ERR-33": {
+      "title": "Kẹt biên bản kiểm tra QC ('ko nhap dc kt') & Phê duyệt Hoàn tác Reopen",
+      "root_cause": "Kiosk QC đóng biên bản (IsDone = 1) khi chưa nhập đủ kích thước hoặc mất kết nối máy đo tự động. Lot bị kéo theo cờ HOLD",
+      "fast_fix": "QC gửi Reopen Request. IT/QA vào /systemAdmin/qualityAdmin -> Tab '되돌리기 요청' bấm '승인' (Approve) để mở khóa IsDone=0 và tự động rollback cờ HOLD trên STB_HoldingMaster"
+    },
+    "POP-ERR-34": {
+      "title": "Mất kết nối Agent thu thập PLC 58 PC biên (VINA_PC_MAC)",
+      "root_cause": "Phần mềm vinatechEquipmentDataSetup.exe trên PC xưởng bị dừng service, đứt mạng hoặc tràn bộ nhớ",
+      "fast_fix": "Vào /dataCollection/pcMacDashboard (hoặc pcMacList), tìm IP/MAC bị đỏ '미연결', nhấn nút '재시작' (Restart) để khởi động lại service từ xa hoặc '업데이트' (Update) lên v1.2.33"
+    },
+    "POP-ERR-35": {
+      "title": "Lệch trạng thái 3 bảng huyết mạch (STB_SetInfo - STB_ProdRouteHist - MongoToMesPerformance) & Fallback PQC Web",
+      "root_cause": "Sai lệch giữa Kiosk POP và MES WinForm do chốt nhầm máy, kẹt 'Already completed' hoặc kẹt Worker ngầm. Cần truy vết ngược từ Barcode, ControlNo hoặc mã PQC Web (STB_CommInspDocHistory)",
+      "fast_fix": "Chạy .\\pop.ps1 trace '<Mã>'. Áp dụng 4 quy tắc Rule 20: (1) Đổi máy update đồng thời cả 2 bảng, (2) Xóa dòng thừa CompleteRoute=1, (3) Sync bù nếu IsTransferred=0, (4) Reset IsDone=0 nếu MES đã xóa"
+    },
+    "POP-ERR-36": {
+      "title": "Kẹt Buffer Đóng Gói VINA_PACKING_REMAIN_QTY (Ghost Record PACKED_QTY = 0)",
+      "root_cause": "Giao diện đóng gói Kiosk POP lưu bản ghi tồn đọng vào VINATECH_POP.dbo.VINA_PACKING_REMAIN_QTY nhưng PACKED_QTY bị rỗng hoặc = 0 trong khi TOTAL_PROD_QTY > 0 làm nghẽn hiển thị số lượng còn lại.",
+      "fast_fix": "Chạy .\\pop.ps1 trace <Lot> để quét kiểm tra Table 5.4. Nếu có dòng rác, kiểm tra STB_SetInfo và cập nhật PACKED_QTY hoặc xóa bản ghi mồ côi."
+    },
+    "POP-ERR-37": {
+      "title": "Không in được tem PackingID (Chưa sinh PackingID hoặc IsPrintAllow = False)",
+      "root_cause": "Công đoạn đóng gói chưa hoàn tất hoặc tem đã in quá số lần cho phép (IsPrintAllow=0 trong STB_PackingLabelPrintHist).",
+      "fast_fix": "Chạy .\\pop.ps1 pack <Lot> hoặc .\\mes.ps1 pack <Lot> để xác định tình trạng và lấy mã PackingID."
+    },
+    "POP-ERR-38": {
+      "title": "Lỗi đăng nhập Kiosk / Không chọn được công nhân vào ca / Thiếu quyền Admin hủy box",
+      "root_cause": "Mã nhân viên chưa có trong VINATECH_POP.dbo.VINA_EMP, bị cờ EMP_STOP='1', hoặc thiếu EMP_ADMIN='Y' để hủy box.",
+      "fast_fix": "Chạy .\\pop.ps1 user <EmpNo> hoặc .\\mes.ps1 user <EmpNo> để kiểm tra trạng thái trên cả 5 CSDL."
+    }
+  }
+}

@@ -1,0 +1,367 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-09-24 21:30:00",
+  "description": "Pre-compiled In-Memory L1 Cache Matrix for YoungLimWon K-System Ace ERP (17 Modules, 213 Process Menus, 4,473 Programs)",
+  "portal": {
+    "url": "https://evn.vinatech.com/",
+    "company_seq": 1,
+    "company_name": "비나텍(베트남법인)",
+    "vendor": "YoungLimWon SoftLab Co., Ltd.",
+    "build_version": "v6.1.8.1006.01",
+    "databases": {
+      "business": "VINATECVN",
+      "common": "VINATECVNCommon"
+    }
+  },
+  "modules": {
+    "1": {
+      "module_seq": 1,
+      "module_code": "ADMIN",
+      "name_vi": "Điều hành",
+      "name_ko": "시스템관리 / 운영관리",
+      "process_menu_count": 17,
+      "program_count": 357,
+      "key_tables": ["_TCAUser", "_TCAPrcMenu", "_TCAPgmControls", "_TCAServiceMethodLink", "_TCADictionary"],
+      "key_screens": [
+        {
+          "pgm_seq": 525585,
+          "pgm_id": "FrmWCMUserEntrySinCompanyWeb",
+          "name_vi": "Đăng ký người sử dụng",
+          "desc": "Quản lý danh sách tài khoản nội bộ và phân quyền truy cập"
+        },
+        {
+          "pgm_seq": 524337,
+          "pgm_id": "FrmWCMPrcMenuGroupSecuEntry",
+          "name_vi": "Đăng ký quyền hạn theo nhóm",
+          "desc": "Ma trận phân quyền nhóm người dùng theo từng quy trình nghiệp vụ"
+        },
+        {
+          "pgm_seq": 526700,
+          "pgm_id": "FrmWCMPrcMenuPgmGroupSecuExcptAll",
+          "name_vi": "Ngoại lệ bảo mật chương trình theo nhóm",
+          "desc": "Cấp quyền/chặn từng nút bấm và form cụ thể cho nhóm người dùng"
+        }
+      ]
+    },
+    "100": {
+      "module_seq": 100,
+      "module_code": "MASTER",
+      "name_vi": "Cơ bản",
+      "name_ko": "기준정보 (Master Data)",
+      "process_menu_count": 5,
+      "program_count": 105,
+      "key_tables": ["_TDAItem", "_TDACust", "_TDAVendor", "_TDAWH", "_TDACurrRate"],
+      "key_screens": [
+        {
+          "pgm_seq": 501001,
+          "pgm_id": "FrmMDItemMaster",
+          "name_vi": "Danh mục sản phẩm / vật tư",
+          "desc": "Quản lý mã hàng hóa, linh kiện tụ điện, quy cách, đơn vị tính"
+        },
+        {
+          "pgm_seq": 501002,
+          "pgm_id": "FrmMDCustMaster",
+          "name_vi": "Danh mục khách hàng",
+          "desc": "Quản lý đối tác thương mại, thông tin thanh toán, mã số thuế"
+        },
+        {
+          "pgm_seq": 501003,
+          "pgm_id": "FrmMDVendorMaster",
+          "name_vi": "Danh mục nhà cung cấp",
+          "desc": "Quản lý vendor cung cấp cuộn nhôm, hóa chất, bao bì"
+        }
+      ]
+    },
+    "2": {
+      "module_seq": 2,
+      "module_code": "HRM",
+      "name_vi": "Nhân sự",
+      "name_ko": "인사관리",
+      "process_menu_count": 8,
+      "program_count": 168,
+      "key_tables": ["_THREmp", "_THRDept", "_THRPosition", "_THRCareer"],
+      "key_screens": [
+        {
+          "pgm_seq": 502001,
+          "pgm_id": "FrmHREmpEntry",
+          "name_vi": "Hồ sơ thông tin nhân viên",
+          "desc": "Quản lý 825+ CBNV Vinatech Việt Nam, phòng ban, chức vụ"
+        }
+      ]
+    },
+    "3": {
+      "module_seq": 3,
+      "module_code": "PAYROLL",
+      "name_vi": "Lương, thù lao",
+      "name_ko": "급여 / 근태관리",
+      "process_menu_count": 30,
+      "program_count": 630,
+      "key_tables": ["_TPRAttendance", "_TPRBasTaxTableEmpCntTax", "_TPRSalaryGrid", "_TPRSocialInsurance"],
+      "key_screens": [
+        {
+          "pgm_seq": 503001,
+          "pgm_id": "FrmPYMonthSalary",
+          "name_vi": "Bảng tính lương tháng tự động",
+          "desc": "Tính lương từ dữ liệu chấm công, khấu trừ thuế TNCN và bảo hiểm"
+        }
+      ]
+    },
+    "4": {
+      "module_seq": 4,
+      "module_code": "ACCOUNTING",
+      "name_vi": "Kế toán",
+      "name_ko": "재무회계 (General Accounting)",
+      "process_menu_count": 30,
+      "program_count": 630,
+      "key_tables": ["_TACSlip", "_TACSlipD", "_TACSlipAutoEnvRowCol", "_TACAccount", "_TACAsst"],
+      "key_screens": [
+        {
+          "pgm_seq": 504001,
+          "pgm_id": "FrmACGeneralSlipEntry",
+          "name_vi": "Đăng ký chứng từ kế toán",
+          "desc": "Nhập và duyệt phiếu kế toán tổng hợp, phiếu thu/chi"
+        },
+        {
+          "pgm_seq": 504002,
+          "pgm_id": "FrmACLedgerQuery",
+          "name_vi": "Truy vấn sổ cái kế toán",
+          "desc": "Sổ nhật ký chung, sổ chi tiết tài khoản kế toán"
+        }
+      ]
+    },
+    "118": {
+      "module_seq": 118,
+      "module_code": "FINTECH",
+      "name_vi": "Fintech",
+      "name_ko": "펌뱅킹 / 금융연계 (Firm Banking)",
+      "process_menu_count": 5,
+      "program_count": 105,
+      "key_tables": ["_TFTBankTrnx", "_TFTAccountBalance", "_TFTAutoReconcile"],
+      "key_screens": [
+        {
+          "pgm_seq": 518001,
+          "pgm_id": "FrmFTBankStatementQuery",
+          "name_vi": "Truy vấn sao kê giao dịch ngân hàng",
+          "desc": "Tự động lấy lịch sử số dư từ Shinhan, Woori, VietinBank qua WCMS"
+        }
+      ]
+    },
+    "6": {
+      "module_seq": 6,
+      "module_code": "SALES",
+      "name_vi": "Kinh doanh / Xuất khẩu",
+      "name_ko": "영업 / 무역관리 (Sales & Export)",
+      "process_menu_count": 23,
+      "program_count": 483,
+      "key_tables": ["_TSASalesOrder", "_TSASalesOrderD", "_TSAInvoice", "_TSAExportDoc"],
+      "key_screens": [
+        {
+          "pgm_seq": 506001,
+          "pgm_id": "FrmSAOrderEntry",
+          "name_vi": "Đăng ký đơn hàng bán (Sales Order)",
+          "desc": "Nhập hợp đồng bán hàng cho khách hàng trong và ngoài nước"
+        }
+      ]
+    },
+    "126": {
+      "module_seq": 126,
+      "module_code": "TAX_CLOSING",
+      "name_vi": "회계결산/신고",
+      "name_ko": "Kế toán quyết toán & Kê khai thuế",
+      "process_menu_count": 14,
+      "program_count": 294,
+      "key_tables": ["_TACTaxClosing", "_TACVATDeclaration", "_TACFinancialStatementReport"],
+      "key_screens": [
+        {
+          "pgm_seq": 526001,
+          "pgm_id": "FrmACTaxClosingEntry",
+          "name_vi": "Khóa sổ quyết toán kế toán định kỳ",
+          "desc": "Quyết toán tháng/quý/năm, lập báo cáo tài chính chuẩn mực VN/HQ"
+        }
+      ]
+    },
+    "7": {
+      "module_seq": 7,
+      "module_code": "PURCHASING",
+      "name_vi": "Mua hàng / Nhập khẩu",
+      "name_ko": "구매 / 자재조달 (Purchasing & Import)",
+      "process_menu_count": 12,
+      "program_count": 252,
+      "key_tables": ["_TMAPurchaseReq", "_TMAPOH", "_TMAPOL", "_TMAImportDeclaration"],
+      "key_screens": [
+        {
+          "pgm_seq": 507001,
+          "pgm_id": "FrmMAPOEntry",
+          "name_vi": "Đăng ký đơn mua hàng (PO)",
+          "desc": "Nhập đơn đặt hàng mua nguyên vật liệu, vật tư tiêu hao"
+        }
+      ]
+    },
+    "8": {
+      "module_seq": 8,
+      "module_code": "PRODUCTION",
+      "name_vi": "Sản xuất / gia công bên ngoài",
+      "name_ko": "생산 / 외주관리 (Manufacturing & Subcontracting)",
+      "process_menu_count": 23,
+      "program_count": 483,
+      "key_tables": ["_TPRWorkOrder", "_TPRBOM", "_TPRWorkCenter", "_TPRProdResult", "_TPRProdScrap", "_TPREquipment"],
+      "key_screens": [
+        {
+          "pgm_seq": 522308,
+          "pgm_id": "FrmWPDLotList",
+          "name_vi": "Truy vấn truy xuất LOT (Lot 360° Traceability)",
+          "desc": "Màn hình trọng điểm truy vết 360 độ: Lưới 1 Routing/Lệnh SX, Lưới 2 Tiêu hao BOM, Lưới 3 PO Vendor"
+        },
+        {
+          "pgm_seq": 508001,
+          "pgm_id": "FrmPDWorkOrderEntry",
+          "name_vi": "Khai báo Lệnh sản xuất (Work Order)",
+          "desc": "Phát hành lệnh sản xuất cấp cao từ kế hoạch kinh doanh xuống nhà máy"
+        },
+        {
+          "pgm_seq": 508002,
+          "pgm_id": "FrmPDMRPCalculation",
+          "name_vi": "Thuật toán hoạch định nhu cầu vật liệu (MRP)",
+          "desc": "Bóc tách đa tầng BOM để tính toán lượng NVL thiếu hụt cần cấp phát"
+        }
+      ]
+    },
+    "9": {
+      "module_seq": 9,
+      "module_code": "QUALITY",
+      "name_vi": "Chất lượng sản phẩm",
+      "name_ko": "품질관리 (QA/QC)",
+      "process_menu_count": 7,
+      "program_count": 147,
+      "key_tables": ["_TQCInspIQC", "_TQCInspPQC", "_TQCInspOQC", "_TQCDefectCode"],
+      "key_screens": [
+        {
+          "pgm_seq": 509001,
+          "pgm_id": "FrmQCIQCInspectEntry",
+          "name_vi": "Kiểm tra chất lượng mua hàng (IQC)",
+          "desc": "Nghiệm thu chất lượng cuộn nhôm, dung dịch trước khi cho phép nhập kho"
+        },
+        {
+          "pgm_seq": 509002,
+          "pgm_id": "FrmQCOQCInspectEntry",
+          "name_vi": "Kiểm tra chất lượng xuất xưởng (OQC)",
+          "desc": "Nghiệm thu đóng thùng, nhãn mác thành phẩm trước khi xuất khẩu"
+        }
+      ]
+    },
+    "10": {
+      "module_seq": 10,
+      "module_code": "INVENTORY",
+      "name_vi": "Vật liệu",
+      "name_ko": "자재 / 수불관리 (Warehouse & Inventory)",
+      "process_menu_count": 17,
+      "program_count": 357,
+      "key_tables": ["_TDAWH", "_TMAItemStock", "_TMAItemStockLot", "_TMAGoodsReceipt", "_TMAGoodsIssue"],
+      "key_screens": [
+        {
+          "pgm_seq": 524859,
+          "pgm_id": "FrmWLGMakingLotNoENV",
+          "name_vi": "Thiết lập tạo tự động LotNo",
+          "desc": "Cấu hình quy tắc sinh mã Lot tự động (Prefix, Năm/Tháng, Số Serial)"
+        },
+        {
+          "pgm_seq": 502903,
+          "pgm_id": "FrmWLGWHLOTStockRealList",
+          "name_vi": "Truy vấn chi tiết kiểm kê thực tế hàng tồn kho LOT",
+          "desc": "Kiểm tra tồn kho thực tế theo từng mã LOT trong từng kho chỉ định"
+        },
+        {
+          "pgm_seq": 521504,
+          "pgm_id": "FrmWLGWHLOTStockSumList",
+          "name_vi": "Truy vấn tổng hợp xuất hàng LOT theo kho",
+          "desc": "Thống kê tổng hợp số lượng xuất kho theo Lot"
+        }
+      ]
+    },
+    "11": {
+      "module_seq": 11,
+      "module_code": "COSTING",
+      "name_vi": "Giá vốn",
+      "name_ko": "원가관리 (Costing & COGS)",
+      "process_menu_count": 5,
+      "program_count": 105,
+      "key_tables": ["_TCODirectMaterialCost", "_TCODirectLaborCost", "_TCOOverheadCost", "_TCOUnitProductCost"],
+      "key_screens": [
+        {
+          "pgm_seq": 511001,
+          "pgm_id": "FrmCOUnitCostCalc",
+          "name_vi": "Tính toán giá thành đơn vị thành phẩm",
+          "desc": "Tập hợp chi phí NVL từ kho, nhân công từ ca kíp, khấu hao máy để tính COGS"
+        }
+      ]
+    },
+    "15": {
+      "module_seq": 15,
+      "module_code": "EDI_B2B",
+      "name_vi": "Đặt hàng / nhận đơn đối tác",
+      "name_ko": "B2B 수발주 (Partner EDI Portal)",
+      "process_menu_count": 1,
+      "program_count": 21,
+      "key_tables": ["_TEDIPartnerOrder", "_TEDIPartnerDelivery"],
+      "key_screens": [
+        {
+          "pgm_seq": 515001,
+          "pgm_id": "FrmEDIPartnerOrderPortal",
+          "name_vi": "Cổng giao tiếp đơn hàng đối tác",
+          "desc": "Tiếp nhận đơn hàng điện tử trực tiếp từ đối tác / khách hàng"
+        }
+      ]
+    },
+    "17": {
+      "module_seq": 17,
+      "module_code": "ESS",
+      "name_vi": "ESS",
+      "name_ko": "임직원 자기서비스 (Employee Self-Service)",
+      "process_menu_count": 3,
+      "program_count": 63,
+      "key_tables": ["_TESSPaySlip", "_TESSLeaveReq"],
+      "key_screens": [
+        {
+          "pgm_seq": 517001,
+          "pgm_id": "FrmESSPersonalPaySlip",
+          "name_vi": "Tra cứu phiếu lương cá nhân",
+          "desc": "Cổng tự phục vụ tra cứu bảng lương và xin nghỉ phép của CBNV"
+        }
+      ]
+    },
+    "18": {
+      "module_seq": 18,
+      "module_code": "DASHBOARD",
+      "name_vi": "Mở đầu",
+      "name_ko": "시작하기 (Getting Started & Dashboard)",
+      "process_menu_count": 12,
+      "program_count": 252,
+      "key_tables": ["_TCOMDashboardWidget", "_TCOMNotice"],
+      "key_screens": [
+        {
+          "pgm_seq": 518001,
+          "pgm_id": "FrmDBExecutiveDashboard",
+          "name_vi": "Bảng tin điều hành tổng thể",
+          "desc": "Biểu đồ KPI sản xuất, tài chính, đơn hàng và chất lượng thời gian thực"
+        }
+      ]
+    },
+    "132": {
+      "module_seq": 132,
+      "module_code": "K_SMART",
+      "name_vi": "K-스마트",
+      "name_ko": "스마트팩토리 연동 (K-Smart / Smart Factory MES Bridge)",
+      "process_menu_count": 1,
+      "program_count": 21,
+      "key_tables": ["_TSFInterfaceWO", "_TSFInterfaceProdResult", "_TSFInterfaceBOM", "_TSFInterfaceLot"],
+      "key_screens": [
+        {
+          "pgm_seq": 10002131,
+          "pgm_id": "FrmSFSmartFactoryBridge",
+          "name_vi": "[K-SMART] Thông tin cơ bản",
+          "desc": "Phân hệ cầu nối đồng bộ Lệnh sản xuất, BOM, Tồn kho LOT giữa K-System và NAIS MES / POP"
+        }
+      ]
+    }
+  }
+}

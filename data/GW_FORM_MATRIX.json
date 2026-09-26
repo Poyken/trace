@@ -1,0 +1,332 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-09-21 07:15:00",
+  "description": "Full 17 Forms & Lifecycles L1 In-Memory Pre-compiled Matrix for Vinatech Groupware (Bizbox Alpha)",
+  "forms": {
+    "FORM_EXPENSE": {
+      "name": "Đơn Đề Xuất Chi Phí (Expense Report Document)",
+      "module": "Purchasing",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_EXPENSE"],
+      "erp_tables": ["NEOE.dbo.FI_DOCU"],
+      "mes_screens": [],
+      "approval_line": "Nguyễn Thị Thúy_V6 (22205010) -> Trần Quang Thỏa (21910034)",
+      "common_errors": {
+        "lỗi_tỷ_giá_ngoại_tệ": "Chưa chọn loại tiền tệ chuyển đổi hoặc kế toán chưa cập nhật bảng tỷ giá ngày.",
+        "kẹt_duyệt_trên_line_thỏa": "Kiểm tra trạng thái duyệt 002, liên hệ người duyệt hoặc ủy quyền."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE, S.NO_EMP_WRITER FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID = 'EXPENSE' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_PURCHASE_REQ": {
+      "name": "Đơn Yêu Cầu Mua Hàng (Purchase Request Document)",
+      "module": "Purchasing",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_PR"],
+      "erp_tables": ["NEOE.dbo.PU_PR"],
+      "mes_screens": [],
+      "approval_line": "Đào Thị Phiên (71908026) -> Trần Quang Thỏa (21910034)",
+      "common_errors": {
+        "thiếu_nhóm_nhận_kế_toán": "Cần thêm CC cho nhóm kế toán (Thúy, Linh, Anh, Trang, Hồng).",
+        "sai_phân_loại_vật_tư": "Phải chọn đúng: NVL, Vật tư phụ, Thiết bị/Nhà xưởng, hoặc IT."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID = 'PR' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_PO": {
+      "name": "Đăng Ký Đơn Mua Hàng (Purchase Order Registration)",
+      "module": "Purchasing",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_POH", "VINA_DOCUMENT_POL"],
+      "erp_tables": ["NEOE.dbo.PU_PO", "NEOE.dbo.PU_POL"],
+      "mes_screens": ["F330"],
+      "approval_line": "Đào Thị Phiên (71908026) -> Trần Quang Thỏa (21910034) -> CEO Kim Kyeong Cheol",
+      "common_errors": {
+        "po_không_đồng_bộ_sang_erp": "Mã nhà cung cấp CD_PARTNER bị khóa hoặc mã vật tư CD_ITEM chưa active trên ERP NEOE.",
+        "sai_tỷ_lệ_vat": "Local bắt buộc nhập VAT, Overseas không nhập VAT mà chọn quy đổi ngoại tệ."
+      },
+      "diagnostic_query": "SELECT H.NO_PO, H.CD_PARTNER, H.CD_COMPANY, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_POH H WITH (NOLOCK) INNER JOIN VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) ON H.DOCUMENT_SAVE_CODE = S.DOCUMENT_SAVE_CODE WHERE H.NO_PO = '{TARGET}'"
+    },
+    "FORM_ARRIVAL": {
+      "name": "Khai Báo Hàng Về (Arrival Confirmation)",
+      "module": "Purchasing",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_RECEIVING_PHYSICAL_ITEM_H", "VINA_DOCUMENT_RECEIVING_PHYSICAL_ITEM_L"],
+      "erp_tables": ["NEOE.dbo.PU_BL"],
+      "mes_screens": ["F330", "C220"],
+      "approval_line": "Nhân viên Mua hàng -> Trưởng phòng Mua hàng -> Thủ kho tiếp nhận",
+      "common_errors": {
+        "mes_f330_không_hiện_hàng": "Phiếu Arrival chưa chuyển sang 008 hoặc sai mã kho tiếp nhận CD_SL.",
+        "lệch_số_lượng_với_po": "Số lượng hàng về vượt quá dung sai cho phép của đơn mua PO."
+      },
+      "diagnostic_query": "SELECT H.DOCUMENT_SAVE_CODE, H.NO_PO, H.CD_SL, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_RECEIVING_PHYSICAL_ITEM_H H WITH (NOLOCK) INNER JOIN VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) ON H.DOCUMENT_SAVE_CODE = S.DOCUMENT_SAVE_CODE WHERE H.NO_PO = '{TARGET}'"
+    },
+    "FORM_RECEIVING": {
+      "name": "Xác Nhận Nhập Kho Chính Thức (Receiving Confirmation)",
+      "module": "Purchasing",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_RECEIVING_CONFIRMATION_H", "VINA_DOCUMENT_RECEIVING_CONFIRMATION_L"],
+      "erp_tables": ["NEOE.dbo.PU_RCV", "NEOE.dbo.PU_RCVL"],
+      "mes_screens": ["C220"],
+      "approval_line": "Thủ kho -> Kế toán kho -> Trưởng phòng Mua hàng",
+      "common_errors": {
+        "chưa_pass_iqc_c220": "Đội QC chưa chốt nút Confirm PASS trên màn hình MES C220 nên GW chặn không cho làm Receiving.",
+        "lệch_tồn_kho_erp": "Phiếu duyệt xong nhưng Job đồng bộ chứng từ kho sang ERP bị ngắt kết nối."
+      },
+      "diagnostic_query": "SELECT H.DOCUMENT_SAVE_CODE, H.NO_PO, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_RECEIVING_CONFIRMATION_H H WITH (NOLOCK) INNER JOIN VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) ON H.DOCUMENT_SAVE_CODE = S.DOCUMENT_SAVE_CODE WHERE H.NO_PO = '{TARGET}'"
+    },
+    "FORM_PURCHASE_RESOLUTION": {
+      "name": "Đóng Sổ Thanh Toán Mua Hàng (Purchase Resolution)",
+      "module": "Finance",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_PURCHASE_RESOLUTION"],
+      "erp_tables": ["NEOE.dbo.FI_DOCU"],
+      "mes_screens": [],
+      "approval_line": "Kế toán mua hàng -> Kế toán trưởng -> Giám đốc tài chính",
+      "common_errors": {
+        "thiếu_hóa_đơn_đỏ": "Chưa đính kèm số Invoice VAT điện tử hoặc hóa đơn thương mại B/L.",
+        "chưa_đối_trừ_công_nợ_tạm_ứng": "Chưa chọn link phiếu chi tạm ứng trước đó trong chuỗi tài liệu."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%PURCHASE_RES%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_MONTH_PLAN": {
+      "name": "Kế Hoạch Sản Xuất Tháng (Month Production Plan)",
+      "module": "Production",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_PROD_MONTH_PRODPLAN", "VINA_PROD_MONTH_PRODPLAN_HISTORY"],
+      "erp_tables": ["NEOE.dbo.PR_WO"],
+      "mes_screens": ["B310", "B450"],
+      "approval_line": "Trưởng phòng Kế hoạch -> Giám đốc khối Sản xuất -> CEO Kim Kyeong Cheol",
+      "common_errors": {
+        "không_hiện_lệnh_trên_mes_b310": "Chưa xác nhận lô hàng (chuyển trạng thái sang 'Sản xuất') hoặc BOM version khác 2001.",
+        "lỗi_tính_toán_nguyên_vật_liệu": "BOM trên ERP thiếu cấu hình định mức cho một số bán thành phẩm cấp dưới."
+      },
+      "diagnostic_query": "SELECT CD_COMPANY, YM_PLAN, CD_ITEM, QT_PLAN, YN_CONFIRM FROM VINATECH_GROUP.dbo.VINA_PROD_MONTH_PRODPLAN WITH (NOLOCK) WHERE YM_PLAN = '{TARGET}'"
+    },
+    "FORM_DAILY_PLAN": {
+      "name": "Kế Hoạch Sản Xuất Ngày & Phát Hành Lot (Daily Production Plan)",
+      "module": "Production",
+      "tables": ["VINA_DOCUMENT_SAVE", "SmartFactoryV2.dbo.STB_DayProdPlan"],
+      "erp_tables": [],
+      "mes_screens": ["B450", "B540", "B530"],
+      "approval_line": "Tổ trưởng sản xuất -> Quản đốc xưởng",
+      "common_errors": {
+        "lỗi_tạo_lot_trùng_lặp": "Mã Lot đã được sinh trước đó trên ca cũ nhưng chưa đóng phiên làm việc.",
+        "máy_bị_khóa_active": "Thiết bị còn kẹt trạng thái ACTIVE trên Kiosk POP từ kế hoạch ngày cũ."
+      },
+      "diagnostic_query": "SELECT TOP 10 LotID, JobDate, MachineCode, CompleteRoute FROM SmartFactoryV2.dbo.STB_DayProdPlan WITH (NOLOCK) WHERE JobDate = '{TARGET}'"
+    },
+    "FORM_ITEM_REG": {
+      "name": "Đăng Ký Mã Vật Tư Mới (Item Registration)",
+      "module": "MasterData",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_ITEM_MODEL", "VINA_DOUZONE_ITEM_UNIT_UPDATE"],
+      "erp_tables": ["NEOE.dbo.MA_PITEM"],
+      "mes_screens": ["A230", "A410"],
+      "approval_line": "Kỹ thuật R&D -> Trưởng phòng Kỹ thuật -> Quản trị Master Data ERP",
+      "common_errors": {
+        "không_hiện_vol_farad_mes": "Chưa nhập thông số kỹ thuật điện áp/điện dung tại màn hình A230/A410.",
+        "thiếu_độ_dày_màng_b442": "Chưa set MaterialThickness trên STB_MaterialMaster."
+      },
+      "diagnostic_query": "SELECT CD_ITEM, NM_ITEM, CD_SPEC FROM NEOE_ERP.dbo.MA_PITEM WITH (NOLOCK) WHERE CD_ITEM = '{TARGET}'"
+    },
+    "FORM_BOM_REG": {
+      "name": "Đăng Ký & Cập Nhật BOM (BOM Registration 2001)",
+      "module": "MasterData",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_PITEM_MAPPING"],
+      "erp_tables": ["NEOE.dbo.PR_BOM"],
+      "mes_screens": ["A310"],
+      "approval_line": "Kỹ thuật R&D -> Quản lý sản xuất -> Quản trị ERP",
+      "common_errors": {
+        "bom_version_không_phải_2001": "MES chỉ nhận BOM chuẩn version 2001 cho nhà máy Việt Nam.",
+        "lỗi_đứt_gãy_routing_công_đoạn": "Chưa map RouteCode tương ứng giữa BOM và cấu hình chuyền B210."
+      },
+      "diagnostic_query": "SELECT CD_ITEM, CD_MATL, QT_DOSAGE FROM NEOE_ERP.dbo.PR_BOM WITH (NOLOCK) WHERE CD_ITEM = '{TARGET}'"
+    },
+    "FORM_PARTNER_REG": {
+      "name": "Đăng Ký Nhà Thầu / Khách Hàng (Partner Registration)",
+      "module": "MasterData",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_PARTNER_USE"],
+      "erp_tables": ["NEOE.dbo.MA_PARTNER"],
+      "mes_screens": [],
+      "approval_line": "Nhân viên Mua hàng/Kinh doanh -> Kế toán trưởng -> CEO Kim Kyeong Cheol",
+      "common_errors": {
+        "trùng_mã_số_thuế": "Mã số thuế của nhà cung cấp đã tồn tại trong danh mục đối tác ERP.",
+        "chưa_gán_tài_khoản_ngân_hàng": "Không thể làm phiếu thanh toán nếu đối tác chưa được khai báo số tài khoản."
+      },
+      "diagnostic_query": "SELECT CD_PARTNER, LN_PARTNER, NO_COMPANY FROM NEOE_ERP.dbo.MA_PARTNER WITH (NOLOCK) WHERE CD_PARTNER = '{TARGET}'"
+    },
+    "FORM_LEAVE": {
+      "name": "Đơn Xin Nghỉ Phép (Leave Request Document)",
+      "module": "HR",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_LEAVE_REQUEST"],
+      "erp_tables": ["NEOE.dbo.HR_LEAVE"],
+      "mes_screens": [],
+      "approval_line": "Nhân viên -> Trưởng nhóm -> Trưởng phòng -> Bộ phận Nhân sự HR",
+      "common_errors": {
+        "vượt_quá_ngày_phép_năm": "Hệ thống tự động cảnh báo nếu số ngày nghỉ vượt quá quỹ phép khả dụng.",
+        "trùng_khoảng_thời_gian": "Đã có phiếu nghỉ phép khác được duyệt trong cùng khoảng thời gian."
+      },
+      "diagnostic_query": "SELECT S.DOCUMENT_SAVE_CODE, S.NO_EMP_WRITER, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%LEAVE%' AND S.NO_EMP_WRITER = '{TARGET}'"
+    },
+    "FORM_BUSINESS_TRIP": {
+      "name": "Đơn Đi Công Tác (Business Trip Document)",
+      "module": "HR",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_BUSINESS_TRIP"],
+      "erp_tables": ["NEOE.dbo.HR_TRIP"],
+      "mes_screens": [],
+      "approval_line": "Nhân viên -> Trưởng phòng -> Giám đốc bộ phận -> Tổng Giám Đốc",
+      "common_errors": {
+        "chưa_làm_trip_report_sau_khi_về": "Hệ thống khóa làm phiếu công tác mới nếu chuyến đi cũ chưa nộp báo cáo.",
+        "vượt_định_mức_công_tác_phí": "Cần giải trình chi tiết nếu chi phí khách sạn/vé máy bay vượt khung quy chế."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%TRIP%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_DISBURSEMENT": {
+      "name": "Đề Nghị Thanh Toán (Disbursement Document)",
+      "module": "Finance",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_DISBURSEMENT"],
+      "erp_tables": ["NEOE.dbo.FI_DOCU"],
+      "mes_screens": [],
+      "approval_line": "Người đề nghị -> Trưởng bộ phận -> Kế toán thanh toán -> Kế toán trưởng -> CEO",
+      "common_errors": {
+        "chưa_kéo_link_po_liên_quan": "Thanh toán tiền hàng bắt buộc phải liên kết tới mã đơn PO và phiếu Receiving.",
+        "sai_tài_khoản_chi_phí_kế_toán": "Phải chọn đúng tài khoản chi phí theo quy chế hạch toán Vinatech."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%DISBURSE%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_SUJU": {
+      "name": "Đơn Đặt Hàng Bán (Sales Order Request / Suju)",
+      "module": "Sales",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_SALES_SELLPLAN", "VINA_SALES_MONTH_PLAN"],
+      "erp_tables": ["NEOE.dbo.SA_SO", "NEOE.dbo.SA_SOL"],
+      "mes_screens": [],
+      "approval_line": "Nhân viên Kinh doanh -> Trưởng phòng Bán hàng -> CEO Kim Kyeong Cheol",
+      "common_errors": {
+        "không_tự_động_sinh_month_plan": "Cần kiểm tra cờ tự động sinh kế hoạch sản xuất từ Suju đã được kích hoạt chưa.",
+        "khách_hàng_quá_hạn_công_nợ": "ERP cảnh báo nếu khách hàng có nợ xấu quá hạn mức cho phép."
+      },
+      "diagnostic_query": "SELECT TOP 10 NO_SO, CD_PARTNER, DT_SO FROM NEOE_ERP.dbo.SA_SO WITH (NOLOCK) WHERE NO_SO = '{TARGET}'"
+    },
+    "FORM_SHIPMENT_REQ": {
+      "name": "Phiếu Đề Nghị Xuất Hàng (Shipment Request Document)",
+      "module": "Sales",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_SALES_PROD_HAND"],
+      "erp_tables": ["NEOE.dbo.SA_GIR"],
+      "mes_screens": ["FG01"],
+      "approval_line": "Phòng Kinh doanh -> Quản đốc kho thành phẩm",
+      "common_errors": {
+        "kho_fg01_không_thấy_lệnh_xuất": "Phiếu Shipment Request chưa được duyệt hoặc tồn kho thành phẩm chưa đủ.",
+        "box_chưa_pass_oqc": "Thành phẩm chưa có kết quả kiểm tra xuất xưởng C512 PASS."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%SHIP%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_SHIPMENT_CONFIRM": {
+      "name": "Xác Nhận Xuất Hàng & Thông Quan (Shipment Confirmation)",
+      "module": "Sales",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_TRADE_ALL_INVOICE", "VINA_DOCUMENT_TR_INV"],
+      "erp_tables": ["NEOE.dbo.SA_IV"],
+      "mes_screens": ["B750"],
+      "approval_line": "Thủ kho thành phẩm -> Phòng Xuất nhập khẩu -> Kế toán doanh thu",
+      "common_errors": {
+        "lỗi_in_tem_pallet_b750": "Chưa quét đủ số lượng Box vào Pallet hoặc thiếu thông tin niêm phong chì.",
+        "chưa_khớp_tờ_khai_hải_quan": "Số Invoice và Packing List chưa khớp với dữ liệu truyền hải quan VNACCS."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%CONFIRM%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_EMP_REQUEST": {
+      "name": "Yêu Cầu Tuyển Dụng (Emp Request Document)",
+      "module": "HR",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_EMP_REQUEST"],
+      "erp_tables": ["NEOE.dbo.MA_EMP"],
+      "mes_screens": [],
+      "approval_line": "Team Leader -> Group Leader (Tiếp nhận: Phòng Nhân sự HR)",
+      "common_errors": {
+        "thiếu_phân_loại_tuyển_dụng": "Phải chọn rõ: Tuyển thay thế, Tuyển mới, hoặc Tuyển bổ sung.",
+        "hủy_đơn_khi_đã_duyệt": "Chỉ hủy được khi chưa được phê duyệt hoàn toàn; form hủy quay về Temporary Storage."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%EMP_REQ%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_EMP_RETIRE": {
+      "name": "Tờ Trình Nghỉ Việc (Employee Retire Document)",
+      "module": "HR",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_EMP_RETIRE"],
+      "erp_tables": ["NEOE.dbo.MA_EMP"],
+      "mes_screens": ["Z410"],
+      "approval_line": "Team Leader -> Group Leader -> Quản lý người Hàn -> Bác Jang -> CEO Kim Kyeong Cheol",
+      "common_errors": {
+        "lỗi_đăng_ký_hộ_sai_người": "Nếu làm hộ nhân viên dưới quyền, bắt buộc phải chọn lại trường 'Người dùng' là tên người nghỉ thực tế.",
+        "chưa_khóa_tài_khoản_mes": "ERP chuyển CD_INCOM='099'; tài khoản VN cần vào MES Z410 đổi AllowFlag='Deny'."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%RETIRE%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_ATTENDANCE_MODIFY": {
+      "name": "Sửa Đổi Ngày Công Chấm Công (Attendance Modify Document)",
+      "module": "HR",
+      "tables": ["VINA_DOCUMENT_SAVE", "SmartFactoryV2.dbo.STB_VN_ATTENDANCE_TIME"],
+      "erp_tables": ["NEOE.dbo.HR_WTM_TIME"],
+      "mes_screens": [],
+      "approval_line": "Lee Sang Hun -> CEO Kim Kyeong Cheol (CC nhóm Kế toán)",
+      "common_errors": {
+        "sai_mã_máy_chấm_công": "Máy lẻ là Check-in, máy chẵn là Check-out; kiểm tra bảng Stb_fingerUserInfo.",
+        "chưa_chạy_job_sync_finger": "Chạy Job SyncFingerData để cập nhật dữ liệu quẹt thẻ mới nhất trước khi chỉnh sửa."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%ATTEND%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_SEAL_REQUEST": {
+      "name": "Đăng Ký Đóng Dấu Công Ty (Seal Request Document)",
+      "module": "Admin",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_SEAL_REQUEST"],
+      "erp_tables": [],
+      "mes_screens": [],
+      "approval_line": "11804002-Lê Thị Vân Anh -> CEO Kim Kyeong Cheol",
+      "common_errors": {
+        "chưa_chọn_loại_con_dấu": "Phải chọn rõ: Con dấu công ty chính, con dấu chi nhánh, hoặc con dấu sử dụng thông thường.",
+        "thiếu_văn_bản_đính_kèm": "Bắt buộc đính kèm bản thảo tài liệu cần đóng dấu pháp lý."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%SEAL%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_DRAFT": {
+      "name": "Tờ Trình Phê Duyệt Tự Do (Draft Document - AI Enhanced)",
+      "module": "Admin",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_AGENT_DYNAMIC_API"],
+      "erp_tables": [],
+      "mes_screens": [],
+      "approval_line": "12407001-Đồng Thị Hòe -> 11910035-Nguyễn Thành Phi (Final)",
+      "common_errors": {
+        "kẹt_duyệt_trên_line_tự_do": "Kiểm tra xem người duyệt kế tiếp có đi vắng mà chưa kích hoạt proxy approval không."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%DRAFT%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_ITEM_PRICE": {
+      "name": "Đăng Ký / Thay Thế Đơn Giá (Item Price Addition & Change)",
+      "module": "MasterData",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_ITEM_PRICE"],
+      "erp_tables": ["NEOE.dbo.PU_PRICEL", "NEOE.dbo.SA_PRICEL"],
+      "mes_screens": [],
+      "approval_line": "71908026-Đào Thị Phiên -> 21910034-Trần Quang Thỏa (CC nhóm Kế toán)",
+      "common_errors": {
+        "mã_hàng_chưa_tạo_code": "Mặt hàng bắt buộc phải được tạo mã code itemRegistration thành công trước khi gán đơn giá.",
+        "lỗi_ngày_hiệu_lực": "Khoảng thời gian Start Date và End Date không được trùng lặp với bảng giá cũ đang active."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%PRICE%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_RECEIVING_PHYSICAL": {
+      "name": "Xác Nhận Nhập Kho Vật Lý Sản Phẩm (Product Receiving Confirmation)",
+      "module": "Production",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_RECEIVING_PHYSICAL_ITEM_H"],
+      "erp_tables": ["NEOE.dbo.MM_RECEIPT"],
+      "mes_screens": ["B530", "FG01"],
+      "approval_line": "Thủ kho -> Kế toán kho -> Quản đốc xưởng",
+      "common_errors": {
+        "chưa_chọn_phân_loại_in_out": "Phải chọn mã allWarehouseInOutCode: 'I' (Nhập kho) hoặc 'O' (Xuất hàng).",
+        "sai_mã_kho_nhận": "Bắt buộc chọn đúng mã kho vật lý tương ứng của nhà máy F1 (VN) hoặc F2 (BG)."
+      },
+      "diagnostic_query": "SELECT TOP 10 S.DOCUMENT_SAVE_CODE, S.DOCUMENT_SAVE_SUBJECT, S.DOCUMENT_SAVE_STATE FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE S WITH (NOLOCK) WHERE S.DOCUMENT_TYPE_ID LIKE '%PHYSICAL%' ORDER BY S.DOCUMENT_SAVE_REG_DATE DESC"
+    },
+    "FORM_RAW_MATERIAL_INPUT_ADJUSTMENT": {
+      "name": "Điều Chỉnh / Thay Thế Nguyên Vật Liệu (Raw Material Input Adjustment Document)",
+      "module": "Production/Development",
+      "tables": ["VINA_DOCUMENT_SAVE", "VINA_DOCUMENT_RAW_MATERIAL_INPUT_PREVENTION"],
+      "erp_tables": [],
+      "mes_screens": ["A230"],
+      "approval_line": "Kỹ sư PE / Sản xuất -> Quản đốc Phân xưởng -> QA / QC -> Giám Đốc Nhà Máy",
+      "common_errors": {
+        "cross_model_overwrite": "DelegateMaterialCode trong STB_MaterialMaster là cấp mã dùng chung, chọn sai quy cách (vd Tape 5mm sang 10mm) sẽ ghi đè toàn bộ model khác.",
+        "chưa_làm_mới_kiosk": "Sau khi duyệt xong, Kiosk POP cần nhấn nút [🔄 Làm mới] để cập nhật mã thay thế mới."
+      },
+      "diagnostic_query": "SELECT TOP 10 DOCUMENT_SAVE_CODE, CD_ITEM, CHILD_MATERIAL_CODE, DELEGATE_MATERIAL_CODE, REG_DTTM, REG_EMPNO FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_RAW_MATERIAL_INPUT_PREVENTION WITH (NOLOCK) WHERE CD_ITEM = '{TARGET}' OR CHILD_MATERIAL_CODE = '{TARGET}' ORDER BY REG_DTTM DESC"
+    }
+  }
+}
+

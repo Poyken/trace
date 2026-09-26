@@ -1,0 +1,127 @@
+export interface HealthStatus {
+  coreDbs: {
+    name: string;
+    status: 'ok' | 'warning' | 'error';
+    latencyMs: number;
+  }[];
+  wipOver24h: {
+    count: number;
+    oldestDate: string;
+    sampleLots: string[];
+  };
+  popSyncPending: {
+    count: number;
+    status: 'ok' | 'warning' | 'error';
+  };
+  blockingLocks: {
+    count: number;
+    details: string;
+  };
+  activeEquipmentLocks: {
+    count: number;
+    machines: string[];
+  };
+  timestamp: string;
+}
+
+export interface TraceResult {
+  target: string;
+  type: 'LOT' | 'PO' | 'MACHINE' | 'BOX';
+  modelCode?: string;
+  modelName?: string;
+  line?: string;
+  currentRoute?: string;
+  status?: string;
+  routeHistory: {
+    routeOrder: number;
+    routeName: string;
+    machineCode: string;
+    workerId: string;
+    inTime: string;
+    outTime: string;
+    goodQty: number;
+    ngQty: number;
+  }[];
+  bomMaterials?: {
+    itemCode: string;
+    itemName: string;
+    bomQty: number;
+    consumedQty: number;
+    stockRouteWh: number;
+    stockMainWh: number;
+    status: 'sufficient' | 'low' | 'critical';
+  }[];
+  pqcStatus?: string;
+  packingInfo?: {
+    packingId: string;
+    boxId: string;
+    standardQty: number;
+    actualQty: number;
+    isPrintAllow: boolean;
+    printCount: number;
+  };
+}
+
+export interface UserInspectionResult {
+  empNo: string;
+  name: string;
+  dept?: string;
+  erpAuth: {
+    status: 'active' | 'inactive' | 'not_found';
+    loginAllowed: boolean;
+    lastLogin?: string;
+  };
+  popKioskAuth: {
+    status: 'active' | 'stopped' | 'not_found';
+    isAdmin: boolean;
+    isSystemAdmin: boolean;
+    isStopped: boolean;
+    mbti?: string;
+  };
+  mesWinFormAuth: {
+    status: 'linked' | 'unlinked' | 'not_found';
+    userId?: string;
+    role?: string;
+  };
+  groupwareAuth: {
+    status: 'active' | 'not_found';
+    approvalRole?: string;
+  };
+  ssoAuth: {
+    status: 'registered' | 'not_found';
+    tokenStatus: string;
+  };
+}
+
+export interface PackInspectionResult {
+  target: string;
+  lotId?: string;
+  packingId: string;
+  boxId?: string;
+  itemCode?: string;
+  itemName?: string;
+  standardQty: number;
+  actualQty: number;
+  printCount: number;
+  isPrintAllow: boolean;
+  saveTime?: string;
+  status: 'COMPLETED' | 'IN_PROGRESS' | 'PRINT_LOCKED' | 'EMPTY';
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: string;
+  structuredResponse?: {
+    rootCause?: string;
+    currentStatus?: string;
+    workaround?: string;
+    hotfixSql?: string;
+  };
+  quickActions?: {
+    label: string;
+    actionType: 'trace' | 'nvl' | 'unlock' | 'user' | 'pack' | 'copy_sql';
+    payload: string;
+  }[];
+}

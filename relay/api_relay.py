@@ -1,0 +1,195 @@
+"""
+======================================================================
+  VINATECH MES - HYBRID SECURE API RELAY SERVER (tools/api_relay.py)
+  Bridge between Vercel Edge Web Portal & Internal On-Premise CLI Hubs
+  Author: Nguyen Van Duc (vanduc - EA Team)
+======================================================================
+"""
+
+import http.server
+import json
+import os
+import subprocess
+import urllib.parse
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+PORT = int(os.environ.get("MES_RELAY_PORT", 5000))
+SECRET_TOKEN = os.environ.get("MES_RELAY_SECRET", "vinatech_secret_token_2026")
+WORKSPACE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+def run_cli_command(cmd_args):
+    """Executes powershell CLI command within MES_POP directory and captures output"""
+    cmd = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"] + cmd_args
+    try:
+        res = subprocess.run(cmd, cwd=WORKSPACE_DIR, capture_output=True, text=True, timeout=30, encoding="utf-8", errors="replace")
+        return {
+            "success": res.returncode == 0,
+            "stdout": res.stdout,
+            "stderr": res.stderr
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+class RelayHandler(BaseHTTPRequestHandler):
+    def _send_cors_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self._send_cors_headers()
+        self.end_headers()
+
+    def _check_auth(self):
+        auth_header = self.headers.get("Authorization", "")
+        if not SECRET_TOKEN:
+            return True
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:].strip()
+            return token == SECRET_TOKEN
+        return False
+
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        params = urllib.parse.parse_qs(parsed.query)
+
+        if not self._check_auth():
+            self.send_response(401)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "Unauthorized"}).encode("utf-8"))
+            return
+
+        if path == "/api/health":
+            result = run_cli_command([".\\mes.ps1", "health"])
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "relay_status": "ONLINE",
+                "raw_output": result.get("stdout", "")
+            }).encode("utf-8"))
+
+        elif path == "/api/trace":
+            target = params.get("target", [""])[0]
+            result = run_cli_command([".\\mes.ps1", "trace", f'"{target}"'])
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode("utf-8"))
+
+        elif path == "/api/pack":
+            target = params.get("target", [""])[0]
+            result = run_cli_command([".\\mes.ps1", "pack", f'"{target}"'])
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode("utf-8"))
+
+        elif path == "/api/user":
+            target = params.get("target", [""])[0]
+            result = run_cli_command([".\\mes.ps1", "user", f'"{target}"'])
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode("utf-8"))
+
+        elif path == "/api/sync":
+            line = params.get("line", [""])[0]
+            cmd = [".\\mes.ps1", "sync"]
+            if line:
+                cmd.extend(["-Line", f'"{line}"'])
+            result = run_cli_command(cmd)
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode("utf-8"))
+
+        elif path == "/api/locks":
+            profile = params.get("profile", ["SmartFactoryV2"])[0]
+            result = run_cli_command([".\\mes.ps1", "locks", "-Profile", f'"{profile}"'])
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode("utf-8"))
+
+        elif path == "/api/screen":
+            screen_id = params.get("id", ["B530"])[0]
+            result = run_cli_command([".\\mes.ps1", "screen", f'"{screen_id}"'])
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode("utf-8"))
+
+        elif path == "/api/lineage":
+            target = params.get("target", [""])[0]
+            result = run_cli_command([".\\mes.ps1", "lineage", f'"{target}"'])
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode("utf-8"))
+
+        elif path == "/api/gw":
+            target = params.get("target", [""])[0]
+            result = run_cli_command([".\\mes.ps1", "gw", f'"{target}"'])
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode("utf-8"))
+
+        else:
+            self.send_response(404)
+            self._send_cors_headers()
+            self.end_headers()
+
+    def do_POST(self):
+        if not self._check_auth():
+            self.send_response(401)
+            self._send_cors_headers()
+            self.end_headers()
+            return
+
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length).decode("utf-8")
+        parsed = urllib.parse.urlparse(self.path)
+
+        if parsed.path == "/api/unlock":
+            try:
+                data = json.loads(body)
+                machine = data.get("machine", "")
+                result = run_cli_command([".\\mes.ps1", "unlock", f'"{machine}"', "-Deploy"])
+                self.send_response(200)
+                self._send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps(result).encode("utf-8"))
+            except Exception as e:
+                self.send_response(400)
+                self._send_cors_headers()
+                self.end_headers()
+        else:
+            self.send_response(404)
+            self._send_cors_headers()
+            self.end_headers()
+
+if __name__ == "__main__":
+    print(f"[*] Starting Vinatech MES Relay Server on port {PORT}...")
+    print(f"[*] Workspace: {WORKSPACE_DIR}")
+    server = HTTPServer(("0.0.0.0", PORT), RelayHandler)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\n[*] Stopping relay server.")
+        server.server_close()

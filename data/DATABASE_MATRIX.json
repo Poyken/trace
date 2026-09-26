@@ -1,0 +1,381 @@
+{
+  "Version": "3.0.0",
+  "Updated": "2026-09-21",
+  "TotalDatabases": 15,
+  "TotalTables": 11509,
+  "TotalViews": 917,
+  "TotalStoredProcedures": 66540,
+  "TotalForeignKeys": 1143,
+  "ActiveAgentJobs": 40,
+  "Server": "dbserver.hycap.co.kr,5398",
+  "LinkedServers": [
+    {"Name": "ERPSVR", "DataSource": "110.11.27.7,2433", "Role": "Korea HQ ERP / Legacy NeoPlus Server"},
+    {"Name": "OLDNAISSVR", "DataSource": "110.11.27.5", "Role": "Legacy NAIS MES Server"},
+    {"Name": "CMS_VINA_LINK", "DataSource": "110.11.27.5\\MESTESTDB,8080", "Role": "Banking CMS FirmBanking Gateway"}
+  ],
+  "Databases": [
+    {
+      "Id": "DB_01",
+      "Database": "SmartFactoryV2",
+      "Profile": "SmartFactoryV2",
+      "Schema": "dbo",
+      "Pillar": "Shop Floor MES & POP",
+      "TableCount": 1140,
+      "ViewCount": 61,
+      "SPCount": 3473,
+      "FKCount": 29,
+      "TriggerCount": 31,
+      "Description": "MES Production Core - Live manufacturing execution for Ha Nam & Hung Yen. Lot management, routing, ESR testing, QC, barcode and packing.",
+      "MajorPrefixes": [
+        {"Prefix": "STB_", "Count": 924, "Description": "SmartFactory Base tables (Routing, Lots, WIP, Defect, Stock)"},
+        {"Prefix": "BAK_", "Count": 67, "Description": "System backup snapshots"},
+        {"Prefix": "ESM_", "Count": 19, "Description": "Equipment & Sensor Monitoring"},
+        {"Prefix": "BK_", "Count": 19, "Description": "Backup tables"},
+        {"Prefix": "VNTVN_", "Count": 11, "Description": "Vinatech Vietnam custom screens"},
+        {"Prefix": "HN_", "Count": 5, "Description": "Ha Nam Factory custom tables"},
+        {"Prefix": "VINA_", "Count": 4, "Description": "External sync interfaces"}
+      ],
+      "HighVolumeTables": [
+        {"Table": "STB_VVT_ESRDATA", "RowCount": 423054864, "SizeMB": 64895, "Role": "Supercapacitor cell ESR measurement telemetry (Largest table in system)"},
+        {"Table": "STB_ProductStockInfo", "RowCount": 69378135, "SizeMB": 13193, "Role": "Finished product warehouse snapshot history"},
+        {"Table": "STB_CommInspMeasureHist", "RowCount": 62000108, "SizeMB": 5710, "Role": "Quality inspection measurement history"},
+        {"Table": "STB_ESRInspectionData", "RowCount": 39668717, "SizeMB": 3115, "Role": "ESR test parameters by cell barcode"},
+        {"Table": "STB_CommInspDocItem", "RowCount": 34248628, "SizeMB": 5293, "Role": "Quality document inspection item results"},
+        {"Table": "STB_IoTMeasureHist", "RowCount": 28798427, "SizeMB": 2531, "Role": "Real-time IoT machine sensor telemetry"},
+        {"Table": "STB_ProcedureLog", "RowCount": 19853100, "SizeMB": 1914, "Role": "Stored procedure execution audit log"},
+        {"Table": "stb_DetailAgaingHN", "RowCount": 14121530, "SizeMB": 2375, "Role": "Ha Nam factory aging process telemetry"}
+      ],
+      "CoreOperationalTables": [
+        {"Table": "STB_SetInfo", "PK": "ControlNo", "KeyField": "Barcode, LotNumber", "Role": "Master Lot & Barcode tracking entity"},
+        {"Table": "STB_ProdRouteHist", "PK": "Composite", "KeyField": "Barcode, RouteCode, JobDate", "Role": "Routing progression step confirmation"},
+        {"Table": "STB_DefectRepairInfo", "PK": "Composite", "KeyField": "Barcode, RouteCode, DefectCode", "Role": "Scrap defect and repair quantities"},
+        {"Table": "STB_MaterialStock", "PK": "Composite", "KeyField": "MaterialCode, WarehouseCode", "Role": "Raw material stock quantities"},
+        {"Table": "STB_MaterialLotInfo", "PK": "MaterialLotNo", "KeyField": "MaterialLotNo, Status, ExpireDate", "Role": "Material roll details and HOLD status"},
+        {"Table": "STB_DayProdPlan", "PK": "DayPlanNo", "KeyField": "DayPlanNo, LineCode, ModelCode", "Role": "Daily production orders"},
+        {"Table": "STB_PackingDetail", "PK": "Composite", "KeyField": "PackingID, Barcode", "Role": "Finished good box packing"},
+        {"Table": "MongoToMesPerformance", "PK": "DayPlanNo, Barcode, RouteCode", "KeyField": "Barcode, RouteCode, IsDone", "Role": "Staging bridge for POP touch Kiosks"}
+      ],
+      "CriticalSPs": [
+        {"SP": "usp_DoProcessProdRouteHist", "Role": "Core production routing step completion engine"},
+        {"SP": "usp_GetProdRouteHistForBarcode_VNT", "Role": "Fetches complete routing history for a barcode"},
+        {"SP": "usp_VINA_SyncPopToMes_SingleLot", "Role": "Syncs POP Kiosk work results into MES RouteHist"},
+        {"SP": "usp_CancelCompleteRouteForBG2WithConditionPassOrFail", "Role": "Rolls back completed route step"},
+        {"SP": "usp_BlockOPCheckPreviousRouteStatus", "Role": "Quality interlock validating previous route step PASS status"}
+      ],
+      "RiskLevel": "CRITICAL"
+    },
+    {
+      "Id": "DB_02",
+      "Database": "SmartFramework",
+      "Profile": "SmartFramework",
+      "Pillar": "Shop Floor MES & POP",
+      "TableCount": 61,
+      "ViewCount": 6,
+      "SPCount": 224,
+      "FKCount": 0,
+      "Description": "MES Security & Framework - User auth, group roles, screen definitions (90+ screens), and WinForms menus.",
+      "CoreOperationalTables": [
+        {"Table": "SF_User", "PK": "UserID", "Role": "MES system user accounts and login credentials"},
+        {"Table": "SF_Group", "PK": "GroupID", "Role": "Permission role groups"},
+        {"Table": "SF_UserGroup", "PK": "UserID, GroupID", "Role": "User-to-Group assignment"},
+        {"Table": "SF_Program", "PK": "ProgramID", "Role": "Registered MES screen programs (A, B, C, F, Z screens)"},
+        {"Table": "SF_GroupProgram", "PK": "GroupID, ProgramID", "Role": "Read/Save/Delete permissions per screen"},
+        {"Table": "SF_Menu", "PK": "MenuID", "Role": "Navigation menu tree"}
+      ],
+      "CriticalSPs": [
+        {"SP": "usp_DoGUILogin", "Role": "Main login authentication for NAIS MES WinForms client"},
+        {"SP": "usp_GetScreenListForUserType", "Role": "Retrieves authorized screen list for user"},
+        {"SP": "usp_DoCreateSerial", "Role": "Generates system-wide unique serial numbers"}
+      ],
+      "RiskLevel": "HIGH"
+    },
+    {
+      "Id": "DB_03",
+      "Database": "VINATECH_GROUP",
+      "Profile": "Groupware",
+      "Pillar": "Groupware & Office",
+      "TableCount": 405,
+      "ViewCount": 4,
+      "SPCount": 6,
+      "FKCount": 611,
+      "Description": "Groupware Main Portal - Electronic approval engine for 17 business forms, PO, PR, Daily Plan, HR, and Sales.",
+      "MajorPrefixes": [
+        {"Prefix": "VINA_", "Count": 403, "Description": "Custom Vinatech Vietnam electronic approval tables"}
+      ],
+      "HighVolumeTables": [
+        {"Table": "VINA_DOCUMENT_APPROVAL_SAVE", "RowCount": 967141, "SizeMB": 227, "Role": "Audit trail of all electronic approval step signatures"},
+        {"Table": "VINA_RECORD_INCREASE", "RowCount": 644647, "SizeMB": 73, "Role": "Incremental change tracking logs"},
+        {"Table": "VINA_RELIABILITY_DATA", "RowCount": 422176, "SizeMB": 48, "Role": "Product reliability test reports"},
+        {"Table": "VINA_DOCUMENT_SAVE", "RowCount": 156475, "SizeMB": 409, "Role": "Master header and HTML rich-text content of all approval documents"},
+        {"Table": "VINA_DAILY_ATTENDANCE", "RowCount": 131278, "SizeMB": 44, "Role": "Daily employee attendance logs"}
+      ],
+      "CoreOperationalTables": [
+        {"Table": "VINA_DOCUMENT_SAVE", "PK": "DOCUMENT_SAVE_CODE", "Role": "Master document header"},
+        {"Table": "VINA_DOCUMENT_POH", "PK": "DOCUMENT_SAVE_CODE", "Role": "Purchase order header linked with ERP NO_PO"},
+        {"Table": "VINA_DOCUMENT_POL", "PK": "DOCUMENT_SAVE_CODE, NO_LINE", "Role": "Purchase order detail items"},
+        {"Table": "VINA_DOCUMENT_DAILY_PLAN", "PK": "DOCUMENT_SAVE_CODE", "Role": "Daily production plan approval"},
+        {"Table": "VINA_DOCUMENT_PAYMENT", "PK": "DOCUMENT_SAVE_CODE", "Role": "Purchase resolution and payment requests"},
+        {"Table": "VINA_DOCUMENT_LEAVE_REQUEST", "PK": "DOCUMENT_SAVE_CODE", "Role": "Employee vacation and overtime requests"}
+      ],
+      "RiskLevel": "CRITICAL"
+    },
+    {
+      "Id": "DB_04",
+      "Database": "NEOE",
+      "Profile": "ERP",
+      "Schema": "NEOE",
+      "Pillar": "ERP Enterprise Ledger",
+      "TableCount": 4883,
+      "ViewCount": 506,
+      "SPCount": 32194,
+      "FKCount": 34,
+      "TriggerCount": 900,
+      "Description": "Douzone iU Enterprise ERP - Central financial ledger, standard BOM, item master, vendors, inventory.",
+      "MajorPrefixes": [
+        {"Prefix": "WC_", "Count": 757, "Description": "Work Center & Cost Accounting"},
+        {"Prefix": "FI_", "Count": 631, "Description": "Financial Accounting & General Ledger"},
+        {"Prefix": "HR_", "Count": 407, "Description": "Human Resources & Payroll"},
+        {"Prefix": "WP_", "Count": 336, "Description": "Work Plant Operation"},
+        {"Prefix": "CA_", "Count": 328, "Description": "Cost Allocation"},
+        {"Prefix": "MA_", "Count": 274, "Description": "Master Data (Company, Item, Vendor, Warehouse)"},
+        {"Prefix": "WH_", "Count": 264, "Description": "Warehouse Management ERP"},
+        {"Prefix": "PR_", "Count": 234, "Description": "Production & Standard BOM"},
+        {"Prefix": "WS_", "Count": 233, "Description": "Work Schedule & Shifts"},
+        {"Prefix": "WM_", "Count": 184, "Description": "Warehouse Movement"},
+        {"Prefix": "SA_", "Count": 182, "Description": "Sales & Distribution (Suju, Shipment)"},
+        {"Prefix": "PU_", "Count": 120, "Description": "Purchasing & Inbound Logistics"}
+      ],
+      "HighVolumeTables": [
+        {"Table": "PR_BOM_LOG", "RowCount": 3948222, "Role": "BOM revision and modification history"},
+        {"Table": "MA_PITEM_LOG", "RowCount": 2760843, "Role": "Master item property modification logs"},
+        {"Table": "MM_QTIO_LOG", "RowCount": 1175728, "Role": "Material transaction audit log"},
+        {"Table": "PR_REQH", "RowCount": 984842, "Role": "Production requisition headers"},
+        {"Table": "HR_WTMCALC", "RowCount": 959575, "Role": "HR working hours payroll calculation"},
+        {"Table": "MM_QTIO", "RowCount": 716371, "Role": "Real-time material in/out stock movements"},
+        {"Table": "FI_DOCU", "RowCount": 437784, "Role": "General Ledger official accounting vouchers"}
+      ],
+      "CriticalSPs": [
+        {"Prefix": "UP_WC", "Count": 7204, "Role": "Work center and cost calculation procedures"},
+        {"Prefix": "UP_FI", "Count": 4734, "Role": "Financial accounting journal entry procedures"},
+        {"Prefix": "UP_HR", "Count": 2582, "Role": "Payroll and timekeeping procedures"},
+        {"Prefix": "UP_WM", "Count": 2146, "Role": "Warehouse movement procedures"},
+        {"Prefix": "UP_SA", "Count": 1632, "Role": "Sales order and shipment procedures"},
+        {"Prefix": "UP_PU", "Count": 1558, "Role": "Purchase order and receiving procedures"}
+      ],
+      "RiskLevel": "CRITICAL"
+    },
+    {
+      "Id": "DB_05",
+      "Database": "DZICUBE",
+      "Profile": "Bizbox",
+      "Pillar": "ERP Enterprise Ledger",
+      "TableCount": 3387,
+      "ViewCount": 288,
+      "SPCount": 28799,
+      "FKCount": 8,
+      "Description": "Douzone Bizbox Alpha - Automated accounting bridge between Groupware approvals and ERP ledger.",
+      "MajorPrefixes": [
+        {"Prefix": "ZL_", "Count": 268, "Description": "Bizbox System Logs"},
+        {"Prefix": "BARPLUS_", "Count": 124, "Description": "Barcode & RFID Mobile Integration"},
+        {"Prefix": "DZ_", "Count": 101, "Description": "Douzone Core Framework"},
+        {"Prefix": "EB_", "Count": 66, "Description": "Electronic Billing"},
+        {"Prefix": "WH_", "Count": 65, "Description": "Warehouse Bridge"}
+      ],
+      "CriticalSPs": [
+        {"Prefix": "USP_A", "Count": 5036, "Role": "Accounting automatic journal slip creation"},
+        {"Prefix": "USP_B", "Count": 5036, "Role": "Basic business and organization bridge"},
+        {"Prefix": "USP_W", "Count": 4211, "Role": "Workflow electronic approval synchronization"}
+      ],
+      "RiskLevel": "HIGH"
+    },
+    {
+      "Id": "DB_06",
+      "Database": "VINATECH_POP",
+      "Profile": "POP",
+      "Pillar": "Shop Floor MES & POP",
+      "TableCount": 66,
+      "ViewCount": 0,
+      "SPCount": 0,
+      "FKCount": 25,
+      "Description": "Point Of Production - Kiosk hardware MAC auth, machine mapping, PLC log config, barcode scan validation, interlocks.",
+      "CoreOperationalTables": [
+        {"Table": "VINA_PC_MAC", "PK": "PC_MAC_ADDRESS", "Role": "Hardware MAC address mapping to terminal config"},
+        {"Table": "VINA_EQUIPMENT_SETTING", "PK": "EQUIPMENT_SETTING_ID", "Role": "Machine communication, log pattern, temp limits"},
+        {"Table": "VINA_EQUIPMENT_MAPPING", "PK": "MAPPING_ID", "Role": "Active physical machines assigned to Day Plans"},
+        {"Table": "VINA_BOM_INPUT_ROUTE", "PK": "Composite", "Role": "Sub-material scanning validation by route"},
+        {"Table": "VINA_INTERLOCK_SETTING", "PK": "INTERLOCK_ID", "Role": "Production quality interlock constraints"},
+        {"Table": "VINA_PACKING_REMAIN_QTY", "PK": "Composite", "Role": "Remainder quantities for box packing"},
+        {"Table": "VINA_LINE_PROD_MODE", "PK": "LINE_CODE", "Role": "Line production mode (Normal vs Rework)"}
+      ],
+      "RiskLevel": "MEDIUM"
+    },
+    {
+      "Id": "DB_07",
+      "Database": "AndonDB",
+      "Profile": "Andon",
+      "Pillar": "Shop Floor MES & POP",
+      "TableCount": 3,
+      "ViewCount": 0,
+      "SPCount": 5,
+      "FKCount": 0,
+      "Description": "Andon Factory Alert - Real-time line stop monitoring, downtime error codes, TV board display, MTBF/MTTR analytics.",
+      "CoreOperationalTables": [
+        {"Table": "STB_LineSituation_VVT", "PK": "id", "Role": "Real-time line situation, errorcode, email/app alert flag"},
+        {"Table": "STB_LineInfo", "PK": "LineCode", "Role": "Factory production line catalog and display groups"},
+        {"Table": "STB_VVT_UserWarning", "PK": "id", "Role": "Maintenance engineers receiving alert notifications"}
+      ],
+      "CriticalSPs": [
+        {"SP": "usp_Vietnam_MTBF_Andon_get", "Role": "Calculates Mean Time Between Failures for lines"},
+        {"SP": "usp_Vietnam_MTTR_Andon_get", "Role": "Calculates Mean Time To Repair for equipment"},
+        {"SP": "usp_Vietnam_Andon60minutes_get", "Role": "Rolling 60-minute line stoppage trend analytics"}
+      ],
+      "RiskLevel": "MEDIUM"
+    },
+    {
+      "Id": "DB_08",
+      "Database": "VINATECH_RESTFUL",
+      "Profile": "SSO",
+      "Pillar": "Shop Floor MES & POP",
+      "TableCount": 3,
+      "ViewCount": 0,
+      "SPCount": 0,
+      "FKCount": 0,
+      "Description": "SSO & REST API Gateway - Token lifecycle management, IP whitelist, login frequency audit.",
+      "CoreOperationalTables": [
+        {"Table": "VINA_SSO_TOKEN", "PK": "SSO_TOKEN_CODE", "Role": "Access token, refresh token, client IP, device type"},
+        {"Table": "VINA_SSO_LOGIN", "PK": "Composite", "Role": "Daily login attempt audit trail"},
+        {"Table": "VINA_ALLOWED_IP", "PK": "ALLOWED_IP", "Role": "Whitelisted server IPs allowed to invoke internal APIs"}
+      ],
+      "RiskLevel": "LOW"
+    },
+    {
+      "Id": "DB_09",
+      "Database": "VINATECH_WEBSOCKET",
+      "Profile": "WebSocket",
+      "Pillar": "Shop Floor MES & POP",
+      "TableCount": 7,
+      "ViewCount": 0,
+      "SPCount": 0,
+      "FKCount": 0,
+      "Description": "WebSocket Server Gateway - Persistent TCP connections for real-time Andon push, machine telemetry, toast alerts.",
+      "CoreOperationalTables": [
+        {"Table": "VINA_MODULE", "PK": "MODULE_ID", "Role": "Registered real-time services (Andon, Notice, Telemetry)"},
+        {"Table": "VINA_STATIC_DATA", "PK": "KEY", "Role": "Heartbeat intervals, timeout settings, buffer sizes"}
+      ],
+      "RiskLevel": "LOW"
+    },
+    {
+      "Id": "DB_10",
+      "Database": "VINATECH_SPREADSHEET",
+      "Profile": "Spreadsheet",
+      "Pillar": "Groupware & Office",
+      "TableCount": 15,
+      "ViewCount": 0,
+      "SPCount": 0,
+      "FKCount": 6,
+      "Description": "Collaborative Web Spreadsheet - Online Excel editor storing sheets as JSON nvarchar(max), concurrency locks.",
+      "CoreOperationalTables": [
+        {"Table": "VINA_SPREAD_SHEET", "PK": "SPREAD_SHEET_CHANNEL", "Role": "Spreadsheet file metadata and document link"},
+        {"Table": "VINA_SPREAD_SHEET_JSON", "PK": "SPREAD_SHEET_CHANNEL", "Role": "Full cell grid, formulas, and styles in JSON"},
+        {"Table": "VINA_SPREAD_SHEET_OPEN", "PK": "Composite", "Role": "Concurrency editing locks"},
+        {"Table": "VINA_SPREAD_SHEET_PERMISSIONS", "PK": "Composite", "Role": "Read/Write/Approval/Export rights"}
+      ],
+      "RiskLevel": "LOW"
+    },
+    {
+      "Id": "DB_11",
+      "Database": "WCMS_STANDARD_NEW",
+      "Profile": "WCMS",
+      "Pillar": "Groupware & Office",
+      "TableCount": 360,
+      "ViewCount": 1,
+      "SPCount": 0,
+      "FKCount": 335,
+      "Description": "Cash Management System - Automated bank statement scraping, corporate card tracking, B2B firm banking.",
+      "CoreOperationalTables": [
+        {"Table": "WCMS_ACCOUNT", "PK": "ACCOUNT_UUID", "Role": "Company bank accounts across VN and KR"},
+        {"Table": "WCMS_ACCOUNT_TRNX_LOG", "PK": "ACCOUNT_TRNX_LOG_UUID", "Role": "Real-time bank statements and ERP_FLAG sync"},
+        {"Table": "WCMS_BALANCE_HISTORY", "PK": "BALANCE_HISTORY_UUID", "Role": "Daily closing balances by account"},
+        {"Table": "WCMS_CARD", "PK": "CARD_UUID", "Role": "Corporate credit cards issued to departments"},
+        {"Table": "WCMS_CARD_USE", "PK": "CARD_USE_UUID", "Role": "Credit card swipe expense records"},
+        {"Table": "WCMS_B2B_LOAN_EXE", "PK": "LOAN_UUID", "Role": "B2B supply chain financing loans"}
+      ],
+      "RiskLevel": "HIGH"
+    },
+    {
+      "Id": "DB_12",
+      "Database": "SmartFactoryIncubator",
+      "Profile": "Incubator",
+      "Pillar": "Shop Floor MES & POP",
+      "TableCount": 50,
+      "ViewCount": 4,
+      "SPCount": 82,
+      "FKCount": 1,
+      "Description": "R&D Testing Sandbox & Plant Utility - Supercapacitor cell performance tests, factory electricity/water monitoring.",
+      "CoreOperationalTables": [
+        {"Table": "STB_CellTestResult", "PK": "SampleID", "Role": "Cell voltage, capacitance, ESR measurement results"},
+        {"Table": "RCV_ASN", "PK": "ASN_NO", "Role": "Advanced Shipping Notice testing for inbound materials"}
+      ],
+      "CriticalSPs": [
+        {"SP": "usp_ElectricityUsageHist_get", "Role": "Electricity consumption analytics by meter"},
+        {"SP": "usp_WastewaterMeterReadingLog_get", "Role": "Wastewater telemetry logs"}
+      ],
+      "RiskLevel": "LOW"
+    },
+    {
+      "Id": "DB_13",
+      "Database": "VINATECH_DATA_KSOX",
+      "Profile": "KSOX",
+      "Pillar": "Groupware & Office",
+      "TableCount": 219,
+      "ViewCount": 1,
+      "SPCount": 36,
+      "FKCount": 0,
+      "Description": "K-SOX Internal Control - Korean SOX / ICFR compliance, risk control matrices, sample design tests.",
+      "CoreOperationalTables": [
+        {"Table": "ICM_CTRLMATRIX_MT", "PK": "CONTROL_UUID", "Role": "Financial reporting risk and internal control definition"},
+        {"Table": "ICM_CTRLMATRIX_TERM", "PK": "TERM_UUID", "Role": "Annual and half-year control evaluation cycles"},
+        {"Table": "ICM_CTRLMATRIX_TERM_DESIGNTEST", "PK": "TEST_UUID", "Role": "Control testing results and evidence attachments"}
+      ],
+      "CriticalSPs": [
+        {"SP": "SAMPLE_POPULATION_CAL", "Role": "Audit sample population sizing calculation"}
+      ],
+      "RiskLevel": "LOW"
+    },
+    {
+      "Id": "DB_14",
+      "Database": "erpdb",
+      "Profile": "LegacyERP",
+      "Pillar": "ERP Enterprise Ledger",
+      "TableCount": 884,
+      "ViewCount": 46,
+      "SPCount": 1721,
+      "FKCount": 68,
+      "Description": "Legacy ERP Archive - Douzone NeoPlus historical database with Korean table names (EUC-KR), read-only.",
+      "CoreOperationalTables": [
+        {"Table": "사원마스타", "PK": "사원번호", "Role": "Legacy employee master records"},
+        {"Table": "거래처마스타", "PK": "거래처코드", "Role": "Legacy vendor and customer directory"},
+        {"Table": "전표H / 전표D", "PK": "전표번호", "Role": "Legacy historical accounting journal slips"}
+      ],
+      "RiskLevel": "LOW"
+    },
+    {
+      "Id": "DB_15",
+      "Database": "streamdocs",
+      "Profile": "StreamDocs",
+      "Pillar": "Groupware & Office",
+      "TableCount": 16,
+      "ViewCount": 0,
+      "SPCount": 0,
+      "FKCount": 6,
+      "Description": "PDF Stream Engine - Secure in-browser document streaming without local downloads, orphan file cleaner.",
+      "CoreOperationalTables": [
+        {"Table": "pdf_resource", "PK": "resource_id", "Role": "PDF file metadata, disk path, MD5 hash"},
+        {"Table": "pdf_auth", "PK": "auth_id", "Role": "Access token keys for web viewer rendering"},
+        {"Table": "pdf_orphan_resource", "PK": "resource_id", "Role": "Unlinked documents scheduled for disk cleanup"},
+        {"Table": "sd_document_usage_history", "PK": "history_id", "Role": "Audit trail of document views by user and IP"}
+      ],
+      "RiskLevel": "LOW"
+    }
+  ]
+}
