@@ -114,7 +114,11 @@ export default function DashboardTab() {
             <Lock className="w-5 h-5 text-rose-500 dark:text-rose-400" />
           </div>
           <div className="text-3xl font-black text-rose-600 dark:text-rose-300 mb-1">{health.activeEquipmentLocks.count} Thiết bị</div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Thiết bị đang khóa phiên thao tác</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+            {health.activeEquipmentLocks.orphanCount !== undefined
+              ? `${health.activeEquipmentLocks.orphanCount} máy kẹt từ ca cũ (Orphan)`
+              : 'Thiết bị đang khóa phiên thao tác'}
+          </p>
           <span className="inline-block text-[11px] px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-mono font-medium">
             VINA_EQUIPMENT_MAPPING
           </span>
@@ -197,27 +201,59 @@ END CATCH;`}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {health.activeEquipmentLocks.machines.map(machine => (
-                <div
-                  key={machine}
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/50 transition-all shadow-sm"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
-                    <span className="font-mono text-xs font-black text-slate-800 dark:text-slate-100">{machine}</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setSelectedMachine(machine);
-                      setIsApprovalModalOpen(true);
-                    }}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold rounded-lg transition shadow-md shadow-cyan-600/20"
+              {health.activeEquipmentLocks.machines.map((item, idx) => {
+                const eqId = typeof item === 'string' ? item : item.equipmentId;
+                const eqName = typeof item === 'object' && item.equipmentName ? item.equipmentName : eqId;
+                const line = typeof item === 'object' ? item.lineCode : null;
+                const route = typeof item === 'object' ? item.routeCode : null;
+                const dayPlan = typeof item === 'object' ? item.dayPlanNo : null;
+                const mappedAt = typeof item === 'object' ? item.mappedAt : null;
+                const isOrphan = typeof item === 'object' ? item.isOrphan : true;
+
+                return (
+                  <div
+                    key={eqId + '-' + idx}
+                    className="flex flex-col justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/50 transition-all shadow-sm space-y-3"
                   >
-                    <Unlock className="w-3.5 h-3.5" />
-                    Mở khóa (Duyệt SQL)
-                  </button>
-                </div>
-              ))}
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <div className="flex items-center space-x-2">
+                          <span className={`w-2 h-2 rounded-full ${isOrphan ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
+                          <span className="font-mono text-xs font-black text-slate-800 dark:text-slate-100">{eqId}</span>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          isOrphan
+                            ? 'bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                            : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                        }`}>
+                          {isOrphan ? 'Kẹt ca cũ' : 'Đang chạy ca'}
+                        </span>
+                      </div>
+
+                      <div className="text-xs font-bold text-slate-900 dark:text-slate-200 truncate" title={eqName}>
+                        {eqName}
+                      </div>
+
+                      <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5 font-mono">
+                        {line && <div><span className="text-slate-400">Line:</span> {line} {route ? `(${route})` : ''}</div>}
+                        {dayPlan && <div><span className="text-slate-400">Kế hoạch:</span> {dayPlan}</div>}
+                        {mappedAt && <div><span className="text-slate-400">Khóa lúc:</span> {mappedAt}</div>}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setSelectedMachine(eqId);
+                        setIsApprovalModalOpen(true);
+                      }}
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold rounded-lg transition shadow-md shadow-cyan-600/20 active:scale-[0.98]"
+                    >
+                      <Unlock className="w-3.5 h-3.5" />
+                      Mở khóa (Duyệt SQL)
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

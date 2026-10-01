@@ -5,7 +5,7 @@ import { fetchFromRelay } from '@/lib/relay-client';
 export async function GET() {
   const relayRes = await fetchFromRelay('/api/health', {
     method: 'GET',
-    timeoutMs: 4000
+    timeoutMs: 10000
   });
 
   if (relayRes.success && relayRes.data) {

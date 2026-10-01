@@ -1,3 +1,14 @@
+export interface ActiveMachineItem {
+  mappingId?: number;
+  equipmentId: string;
+  equipmentName?: string;
+  lineCode?: string;
+  routeCode?: string;
+  dayPlanNo?: string;
+  mappedAt?: string;
+  isOrphan?: boolean;
+}
+
 export interface HealthStatus {
   coreDbs: {
     name: string;
@@ -19,7 +30,9 @@ export interface HealthStatus {
   };
   activeEquipmentLocks: {
     count: number;
-    machines: string[];
+    machines: (string | ActiveMachineItem)[];
+    orphanCount?: number;
+    todayCount?: number;
   };
   timestamp: string;
 }
