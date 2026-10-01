@@ -89,12 +89,26 @@ class RelayHandler(BaseHTTPRequestHandler):
 
         elif path == "/api/trace":
             target = params.get("target", [""])[0]
-            result = run_cli_command([".\\mes.ps1", "trace", f'"{target}"'])
+            # Lay Native JSON truc tiep tu pop_trace.ps1 -Json
+            json_res = run_cli_command([".\\tools\\pop_trace.ps1", "-Target", f'"{target}"', "-Json"])
+            
+            response_payload = {
+                "success": json_res.get("success", False),
+                "output": json_res.get("stdout", ""),
+                "stdout": json_res.get("stdout", "")
+            }
+            try:
+                out_str = json_res.get("stdout", "").strip()
+                if out_str and out_str.startswith("{"):
+                    response_payload["structured"] = json.loads(out_str)
+            except Exception:
+                pass
+            
             self.send_response(200)
             self._send_cors_headers()
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps(result).encode("utf-8"))
+            self.wfile.write(json.dumps(response_payload).encode("utf-8"))
 
         elif path == "/api/pack":
             target = params.get("target", [""])[0]

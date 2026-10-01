@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
           'Mã Thiết Bị Kiosk': 'VVMHY130',
           'Trạng Thái Khóa Máy': 'ACTIVE (Đang trong ca)',
           'Trạng Thái Pipeline': 'IsDone = 1, IsTransferred = 1 (Đã sync MES)',
-          'Công Nhân Thao Tác': '92603003 (Nguyen Van Duc)',
+          'Công Nhân Thao Tác': 'Công nhân vận hành Kiosk POP',
           'Tiến Độ Đóng Thùng': 'Chờ hoàn thành Aging để sinh PackingID'
         },
         timestamp: '2026-09-25 11:45:00'

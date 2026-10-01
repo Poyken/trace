@@ -19,15 +19,20 @@ export async function GET(request: NextRequest) {
   });
 
   if (relayRes.success && relayRes.data) {
-    if (relayRes.data.modelCode) {
-      return NextResponse.json(relayRes.data);
+    // 1. Uu tien tuyet doi: Structured Native JSON tu CSDL production (qua pop_trace.ps1 -Json)
+    const structured = relayRes.data.structured || (relayRes.data.modelCode ? relayRes.data : null);
+    if (structured && Array.isArray(structured.routeHistory) && structured.routeHistory.length > 0) {
+      return NextResponse.json({
+        ...structured,
+        rawCliOutput: relayRes.data.output || relayRes.data.stdout || ''
+      });
     }
     
-    // Parse structured data from CLI stdout
-    if (relayRes.data.stdout) {
-      const text = relayRes.data.stdout;
+    // 2. Parse fallback neu relay chi tra chuoi text stdout
+    if (relayRes.data.stdout || relayRes.data.output) {
+      const text = relayRes.data.output || relayRes.data.stdout || '';
       const modelMatch = text.match(/Ma San pham \/ Model\s*:\s*([^\r\n]+)/i);
-      const modelCode = modelMatch ? modelMatch[1].trim() : 'ECVT30-357';
+      const modelCode = modelMatch ? modelMatch[1].trim() : (target.startsWith('VV') ? 'ECVT30-357' : target);
       
       const poMatch = text.match(/Lenh san xuat \(PO\)\s*:\s*([^\r\n]+)/i);
       const poCode = poMatch ? poMatch[1].trim() : '';
@@ -45,11 +50,10 @@ export async function GET(request: NextRequest) {
         'V-28_HY': 'Nhập kho & In tem (Finished Goods)'
       };
 
-      // 1. Parse worker mapping from STB_ProdRouteHist / STB_ProdRouteWorkerHist in stdout
+      // Parse worker mapping tu STB_ProdRouteHist trong stdout (neu co)
       const routeWorkerMap = new Map<string, { code: string; name: string; time: string }>();
       const prhLines = text.split('\n');
       for (const l of prhLines) {
-        // Pattern: RouteCode ... ProdDateTime ... WorkerCode WorkerName
         const wMatch = l.match(/\b(V-\d+_\w+)\s+\w+\s+[\d.]+\s+[^\r\n]*?(\d{1,2}\/\d{1,2}\/\d{4}\s+[\d:]+\s+[AP]M)\s+(\d{8})\s+([^\r\n]+)/);
         if (wMatch) {
           const rCode = wMatch[1];
@@ -88,13 +92,7 @@ export async function GET(request: NextRequest) {
           const wInfo = routeWorkerMap.get(rCode);
           const workerDisplay = wInfo 
             ? `${wInfo.name} (${wInfo.code})` 
-            : (rCode === 'V-22_HY' || rCode === 'V-23_HY' || rCode === 'V-24_HY') 
-            ? 'NGUYỄN BÁ ANH (32605098)' 
-            : (rCode === 'V-25_HY') 
-            ? 'PHÙNG THỊ NHUNG (32607020)' 
-            : (rCode === 'V-26_HY') 
-            ? 'TRẦN VĂN TIẾN (32607047)' 
-            : 'VƯƠNG HOÀI THƯƠNG (32512040)';
+            : 'Chưa có thông tin công nhân';
 
           history.push({
             routeOrder: idx + 1,
@@ -124,7 +122,8 @@ export async function GET(request: NextRequest) {
             packingId: poCode ? `PO-${poCode}` : 'PENDING_PACK',
             printCount: 0,
             isPrintAllow: 1
-          }
+          },
+          rawCliOutput: text
         });
       }
     }
