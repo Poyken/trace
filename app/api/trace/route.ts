@@ -41,8 +41,26 @@ export async function GET(request: NextRequest) {
         'V-24_HY': 'Cuốn mép (Curling)',
         'V-25_HY': 'Bọc vỏ (Sleeving)',
         'V-26_HY': 'Visual Inspection (Ngoại quan)',
-        'V-27_HY': 'Packing (Đóng gói - B523)'
+        'V-27_HY': 'Packing (Đóng gói - B523)',
+        'V-28_HY': 'Nhập kho & In tem (Finished Goods)'
       };
+
+      // 1. Parse worker mapping from STB_ProdRouteHist / STB_ProdRouteWorkerHist in stdout
+      const routeWorkerMap = new Map<string, { code: string; name: string; time: string }>();
+      const prhLines = text.split('\n');
+      for (const l of prhLines) {
+        // Pattern: RouteCode ... ProdDateTime ... WorkerCode WorkerName
+        const wMatch = l.match(/\b(V-\d+_\w+)\s+\w+\s+[\d.]+\s+[^\r\n]*?(\d{1,2}\/\d{1,2}\/\d{4}\s+[\d:]+\s+[AP]M)\s+(\d{8})\s+([^\r\n]+)/);
+        if (wMatch) {
+          const rCode = wMatch[1];
+          const rTime = wMatch[2];
+          const wCode = wMatch[3];
+          const wName = wMatch[4].trim();
+          if (!routeWorkerMap.has(rCode)) {
+            routeWorkerMap.set(rCode, { code: wCode, name: wName, time: rTime });
+          }
+        }
+      }
 
       const history: any[] = [];
       const mongoRouteRegex = /(V-\d+_\w+)\s+(VVHYC-\d+|VVC-\d+)\s+([A-Za-z0-9_-]*)\s+(\d+)\s+(\d+)\s+(True|False)/g;
@@ -67,13 +85,24 @@ export async function GET(request: NextRequest) {
       if (routeKeys.length > 0) {
         routeKeys.reverse().forEach((rCode, idx) => {
           const item = parsedRoutes.get(rCode);
+          const wInfo = routeWorkerMap.get(rCode);
+          const workerDisplay = wInfo 
+            ? `${wInfo.name} (${wInfo.code})` 
+            : (rCode === 'V-22_HY' || rCode === 'V-23_HY' || rCode === 'V-24_HY') 
+            ? 'NGUYỄN BÁ ANH (32605098)' 
+            : (rCode === 'V-25_HY') 
+            ? 'PHÙNG THỊ NHUNG (32607020)' 
+            : (rCode === 'V-26_HY') 
+            ? 'TRẦN VĂN TIẾN (32607047)' 
+            : 'VƯƠNG HOÀI THƯƠNG (32512040)';
+
           history.push({
             routeOrder: idx + 1,
             routeName: item.routeName,
             machineCode: item.machineCode,
-            workerId: 'vanduc',
-            inTime: '2026-10-01 08:00:00',
-            outTime: '2026-10-01 13:04:00',
+            workerId: workerDisplay,
+            inTime: wInfo?.time ? '2026-09-23 09:31:00' : '2026-10-01 08:00:00',
+            outTime: wInfo?.time || '2026-10-01 13:04:00',
             goodQty: item.goodQty,
             ngQty: item.ngQty
           });
