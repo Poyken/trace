@@ -109,6 +109,39 @@ export default function SettingsTab() {
         </div>
       </div>
 
+      {/* Git & Vercel Deployment Status */}
+      <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Globe className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+            Trạng Thái Kho Mã Nguồn & Tự Động Deploy Lên Vercel
+          </h3>
+          <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-800 font-mono">
+            CI/CD Ready
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+          <div className="p-3 bg-slate-50 dark:bg-slate-950/80 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span className="text-slate-400 block text-[10px] font-sans">GitHub Remote</span>
+            <b className="text-cyan-600 dark:text-cyan-400 truncate block">Poyken/trace.git</b>
+          </div>
+          <div className="p-3 bg-slate-50 dark:bg-slate-950/80 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span className="text-slate-400 block text-[10px] font-sans">Nhánh Sản Xuất</span>
+            <b className="text-slate-900 dark:text-white block">origin / main</b>
+          </div>
+          <div className="p-3 bg-slate-50 dark:bg-slate-950/80 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span className="text-slate-400 block text-[10px] font-sans">Cơ Chế Deploy</span>
+            <b className="text-emerald-600 dark:text-emerald-400 block font-sans">Tự động sau khi git push</b>
+          </div>
+        </div>
+
+        <div className="bg-slate-900 p-3.5 rounded-xl border border-slate-800 font-mono text-xs text-slate-300 space-y-1">
+          <div className="text-slate-400 text-[11px]"># Lệnh 1 dòng đẩy toàn bộ nâng cấp mới lên GitHub để Vercel tự build:</div>
+          <div className="text-emerald-400 font-bold select-all">git add . && git commit -m &quot;feat: complete operations web portal with quick-actions and weekly-report&quot; && git push origin main</div>
+        </div>
+      </div>
+
       {/* Connection Test Panel */}
       <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
         <div>

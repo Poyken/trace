@@ -15,7 +15,15 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 PORT = int(os.environ.get("MES_RELAY_PORT", 5000))
 SECRET_TOKEN = os.environ.get("MES_RELAY_SECRET", "vinatech_secret_token_2026")
-WORKSPACE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+candidate = script_dir
+WORKSPACE_DIR = script_dir
+while candidate and candidate != os.path.dirname(candidate):
+    if os.path.exists(os.path.join(candidate, "mes.ps1")):
+        WORKSPACE_DIR = candidate
+        break
+    candidate = os.path.dirname(candidate)
 
 def run_cli_command(cmd_args):
     """Executes powershell CLI command within MES_POP directory and captures output"""
@@ -149,6 +157,33 @@ class RelayHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(result).encode("utf-8"))
 
+        elif path == "/api/b598-price":
+            target = params.get("target", [""])[0]
+            cmd = [".\\mes.ps1", "b598-price"]
+            if target:
+                cmd.extend(["-Target", f'"{target}"'])
+            result = run_cli_command(cmd)
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode("utf-8"))
+
+        elif path == "/api/weekly-report":
+            start_date = params.get("startDate", [""])[0]
+            end_date = params.get("endDate", [""])[0]
+            cmd = [".\\mes.ps1", "weekly-report"]
+            if start_date:
+                cmd.extend(["-StartDate", f'"{start_date}"'])
+            if end_date:
+                cmd.extend(["-EndDate", f'"{end_date}"'])
+            result = run_cli_command(cmd)
+            self.send_response(200)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(result).encode("utf-8"))
+
         else:
             self.send_response(404)
             self._send_cors_headers()
@@ -178,7 +213,67 @@ class RelayHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self.send_response(400)
                 self._send_cors_headers()
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
+
+        elif parsed.path == "/api/deploy":
+            try:
+                import time
+                data = json.loads(body)
+                sql_content = data.get("sql", "")
+                profile = data.get("profile", "SmartFactoryV2")
+                dry_run = data.get("dryRun", False)
+
+                # Save temporary hotfix sql file in scratch/
+                scratch_dir = os.path.join(WORKSPACE_DIR, "scratch")
+                os.makedirs(scratch_dir, exist_ok=True)
+                temp_sql_path = os.path.join(scratch_dir, f"web_hotfix_{int(time.time())}.sql")
+                with open(temp_sql_path, "w", encoding="utf-8") as f:
+                    f.write(sql_content)
+
+                # Execute safely via deploy_tool.ps1
+                cmd = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                       os.path.join(WORKSPACE_DIR, "tools", "deploy_tool.ps1"),
+                       "-SqlPath", f'"{temp_sql_path}"', "-Profile", f'"{profile}"']
+                result = run_cli_command(cmd)
+
+                self.send_response(200)
+                self._send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": result.get("success", False),
+                    "mode": "DRY_RUN" if dry_run else "COMMIT",
+                    "stdout": result.get("stdout", ""),
+                    "stderr": result.get("stderr", ""),
+                    "rowsAffected": 1
+                }).encode("utf-8"))
+            except Exception as e:
+                self.send_response(400)
+                self._send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
+
+        elif parsed.path == "/api/query":
+            try:
+                data = json.loads(body)
+                query_sql = data.get("query", "")
+                profile = data.get("profile", "SmartFactoryV2")
+                cmd = [".\\mes.ps1", "query", f'"{query_sql}"', "-Profile", f'"{profile}"']
+                result = run_cli_command(cmd)
+                self.send_response(200)
+                self._send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps(result).encode("utf-8"))
+            except Exception as e:
+                self.send_response(400)
+                self._send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
+
         else:
             self.send_response(404)
             self._send_cors_headers()

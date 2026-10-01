@@ -19,12 +19,14 @@ export default function Header({
   toggleTheme
 }: HeaderProps) {
   const tabs = [
+    { id: 'quick_actions', label: '⚡ Cấp Cứu 1-Click' },
     { id: 'copilot', label: 'AI Operations Copilot' },
     { id: 'dashboard', label: 'Live Dashboard' },
-    { id: 'diagnostics', label: '1-Shot Diagnostics' },
-    { id: 'knowledge', label: 'Ma Trận 97 Màn Hình & Lỗi' },
+    { id: 'diagnostics', label: 'Diagnostics 360°' },
+    { id: 'weekly_report', label: '📋 Báo Cáo Tuần IT' },
+    { id: 'knowledge', label: 'Ma Trận & Console SQL' },
     { id: 'hotfix', label: 'Hotfix Console' },
-    { id: 'settings', label: 'Cấu hình & Vercel' }
+    { id: 'settings', label: 'Cấu hình & Relay' }
   ];
 
   return (

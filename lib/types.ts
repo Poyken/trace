@@ -125,3 +125,67 @@ export interface ChatMessage {
     payload: string;
   }[];
 }
+
+export interface LineageResult {
+  target: string;
+  poCode?: string;
+  modelCode?: string;
+  modelName?: string;
+  stages: {
+    stageId: 'PO_GW' | 'WH_MATERIAL' | 'MES_PRODUCTION' | 'POP_KIOSK';
+    title: string;
+    status: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING' | 'WARNING';
+    description: string;
+    details: Record<string, any>;
+    timestamp?: string;
+  }[];
+}
+
+export interface DbLockItem {
+  spid: number;
+  blockedBySpid: number;
+  waitTimeSeconds: number;
+  waitType: string;
+  dbName: string;
+  hostName: string;
+  programName: string;
+  loginName: string;
+  sqlText: string;
+  status: 'BLOCKING' | 'WAITING' | 'NORMAL';
+}
+
+export interface DbLocksResult {
+  profile: string;
+  totalConnections: number;
+  activeLocksCount: number;
+  blockingChainsCount: number;
+  locks: DbLockItem[];
+  timestamp: string;
+}
+
+export interface WeeklyTaskItem {
+  id: string;
+  title: string;
+  system: 'POP' | 'MES' | 'GW' | 'ECM' | 'HW';
+  lotOrTarget?: string;
+  rootCause: string;
+  resolution: string;
+  status: 'RESOLVED' | 'IN_PROGRESS' | 'MONITORING';
+  date: string;
+  author: string;
+}
+
+export interface HotfixActionHistoryItem {
+  id: string;
+  type: string;
+  targetLot: string;
+  targetMachine?: string;
+  targetDate?: string;
+  targetDb: string;
+  mode: 'DRY_RUN' | 'COMMIT';
+  timestamp: string;
+  author: string;
+  success: boolean;
+  message: string;
+}
+

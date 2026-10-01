@@ -2,18 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
+import QuickActionsTab from '@/components/QuickActionsTab';
 import CopilotTab from '@/components/CopilotTab';
 import DashboardTab from '@/components/DashboardTab';
 import DiagnosticsTab from '@/components/DiagnosticsTab';
+import WeeklyReportTab from '@/components/WeeklyReportTab';
 import KnowledgeTab from '@/components/KnowledgeTab';
 import HotfixTab from '@/components/HotfixTab';
 import SettingsTab from '@/components/SettingsTab';
 import CommandPalette from '@/components/CommandPalette';
+import FloatingSpeedDial from '@/components/FloatingSpeedDial';
+import SqlApprovalModal from '@/components/SqlApprovalModal';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('copilot');
+  const [activeTab, setActiveTab] = useState('quick_actions');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [quickUnlockModal, setQuickUnlockModal] = useState<{ isOpen: boolean; machine: string } | null>(null);
   const [diagInitial, setDiagInitial] = useState<{ type: string; target: string }>({
     type: 'trace',
     target: 'VVQR232R710618'
@@ -31,6 +36,43 @@ export default function Home() {
     } else {
       document.documentElement.classList.add('dark');
     }
+  }, []);
+
+  // Keyboard navigation shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => !prev);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '1') {
+        e.preventDefault();
+        setActiveTab('quick_actions');
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '2') {
+        e.preventDefault();
+        setActiveTab('copilot');
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '3') {
+        e.preventDefault();
+        setActiveTab('dashboard');
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '4') {
+        e.preventDefault();
+        setActiveTab('diagnostics');
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '5') {
+        e.preventDefault();
+        setActiveTab('weekly_report');
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '6') {
+        e.preventDefault();
+        setActiveTab('knowledge');
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '7') {
+        e.preventDefault();
+        setActiveTab('hotfix');
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '8') {
+        e.preventDefault();
+        setActiveTab('settings');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const toggleTheme = () => {
@@ -85,6 +127,7 @@ export default function Home() {
 
       {/* Content Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        {activeTab === 'quick_actions' && <QuickActionsTab />}
         {activeTab === 'copilot' && (
           <CopilotTab onNavigateToDiagnostics={handleNavigateToDiagnostics} />
         )}
@@ -95,15 +138,51 @@ export default function Home() {
             initialTarget={diagInitial.target}
           />
         )}
+        {activeTab === 'weekly_report' && <WeeklyReportTab />}
         {activeTab === 'knowledge' && <KnowledgeTab />}
         {activeTab === 'hotfix' && <HotfixTab />}
         {activeTab === 'settings' && <SettingsTab />}
       </main>
 
+      {/* Floating Speed Dial */}
+      <FloatingSpeedDial
+        onNavigateTab={(tab) => setActiveTab(tab)}
+        onOpenUnlockModal={() => setQuickUnlockModal({ isOpen: true, machine: 'VVMHY130' })}
+      />
+
+      {/* Quick Unlock Machine Modal */}
+      {quickUnlockModal?.isOpen && (
+        <SqlApprovalModal
+          isOpen={true}
+          onClose={() => setQuickUnlockModal(null)}
+          title={`Mở Khóa Khẩn Cấp Thiết Bị: ${quickUnlockModal.machine}`}
+          targetDb="VINATECH_POP"
+          sql={`-- ======================================================================
+-- HOTFIX: GIAI PHONG THIET BI BI KET ACTIVE TREN KIOSK POP (RULE 20.5)
+-- Bang muc tieu: VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING
+-- Tac gia: Nguyen Van Duc (vanduc - EA Team)
+-- ======================================================================
+BEGIN TRAN;
+
+UPDATE VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING
+SET MAPPING_STATUS      = 'RELEASED',
+    RELEASED_AT         = GETDATE(),
+    RELEASE_REASON      = N'IT 1-Click unlock by Speed Dial (vanduc)',
+    NO_EMP_MODIFYER     = 'vanduc',
+    CD_COMPANY_MODIFYER = 'VINA'
+WHERE (EQUIPMENT_NAME = '${quickUnlockModal.machine}' OR EQUIPMENT_ID = '${quickUnlockModal.machine}')
+  AND MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED');
+
+SELECT @@ROWCOUNT AS [RowsAffected];
+ROLLBACK TRAN;
+-- COMMIT TRAN;`}
+        />
+      )}
+
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-900 bg-white/80 dark:bg-slate-950/80 py-4 relative z-10 text-center text-xs text-slate-500 dark:text-slate-500 transition-colors">
         <p>
-          Hệ Thống Vinatech MES Operations Copilot • Tác giả & Kỹ sư Vận hành: <span className="text-cyan-600 dark:text-cyan-400 font-mono">Nguyen Van Duc (vanduc)</span> • Vercel Edge Cloud
+          Hệ Thống Vinatech MES Operations Copilot • Tác giả & Kỹ sư Vận hành: <span className="text-cyan-600 dark:text-cyan-400 font-mono">Nguyen Van Duc (vanduc - EA Team)</span> • Vercel Edge Cloud
         </p>
       </footer>
     </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TraceResult } from '@/lib/types';
+import { fetchFromRelay } from '@/lib/relay-client';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -9,18 +10,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Vui lòng cung cấp mã Lot, PO hoặc Thiết bị.' }, { status: 400 });
   }
 
-  const relayUrl = process.env.MES_RELAY_URL;
-  if (relayUrl) {
-    try {
-      const res = await fetch(`${relayUrl}/api/trace?target=${encodeURIComponent(target)}`, {
-        headers: { 'Authorization': `Bearer ${process.env.MES_RELAY_SECRET || ''}` }
-      });
-      if (res.ok) {
-        return NextResponse.json(await res.json());
-      }
-    } catch {
-      // Fallback
-    }
+  const relayRes = await fetchFromRelay(`/api/trace?target=${encodeURIComponent(target)}`, {
+    method: 'GET',
+    timeoutMs: 4000
+  });
+
+  if (relayRes.success && relayRes.data) {
+    return NextResponse.json(relayRes.data);
   }
 
   // Realistic domain-specific 360 trace response

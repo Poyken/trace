@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "2.4.0",
   "updated_at": "2026-09-25 17:00:00",
   "description": "Full 95 Screens & Bugs L1 In-Memory Pre-compiled Matrix for Vinatech MES (Deduplicated & Cleaned v2.3)",
@@ -728,9 +728,10 @@
         "STB_CommInspDocItem"
       ],
       "common_bugs": {
-        "cần_hủy_kết_quả_qc_(nhập_nhầm)": "Data đã ghi vào `STB_CommInspDocHistory` + `STB_CommInspDocItem` -> Xóa để QC làm lại:"
+        "cần_hủy_kết_quả_qc_(nhập_nhầm)": "Data đã ghi vào `STB_CommInspDocHistory` + `STB_CommInspDocItem` -> Xóa để QC làm lại:",
+        "pqc_tích_ok_trên_pop_nhưng_c443_hiện_ng": "POP lưu MeasureResult='0' (0=PASS). SP usp_GetCommInspection_HistoryForBarcode_Vietnam chỉ check ('1','OK') nên ép thành NG -> Sửa SP hỗ trợ IN ('0','OK','PASS') và trỏ đúng CIMH1..CIMH20"
       },
-      "fix_template": "Data đã ghi vào `STB_CommInspDocHistory` + `STB_CommInspDocItem` -> Xóa để QC làm lại:"
+      "fix_template": "Sửa SP usp_GetCommInspection_HistoryForBarcode_Vietnam: WHEN CIMH1.MeasureResult IN ('0', 'OK', 'PASS') THEN 'OK' WHEN CIMH1.MeasureResult IN ('1', 'NG') THEN 'NG'"
     },
     "C451": {
       "name": "PQC Inspection",

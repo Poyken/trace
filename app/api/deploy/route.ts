@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { fetchFromRelay } from '@/lib/relay-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,24 +17,15 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const relayUrl = process.env.MES_RELAY_URL;
-    if (relayUrl) {
-      try {
-        const res = await fetch(`${relayUrl}/api/deploy`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.MES_RELAY_SECRET || ''}`
-          },
-          body: JSON.stringify({ sql, profile, dryRun, author })
-        });
-        if (res.ok) {
-          return NextResponse.json(await res.json());
-        }
-      } catch (err) {
-        // Fall back to safe simulated response with pre-flight guarantee
-        console.warn('Relay deploy failed, fallback to simulated output:', err);
-      }
+    // Attempt deploy via on-premise relay
+    const relayRes = await fetchFromRelay('/api/deploy', {
+      method: 'POST',
+      body: { sql, profile, dryRun, author },
+      timeoutMs: 4000
+    });
+
+    if (relayRes.success && relayRes.data) {
+      return NextResponse.json(relayRes.data);
     }
 
     // Return safe pre-flight response

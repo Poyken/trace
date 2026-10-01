@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "2.1.0",
   "updated_at": "2026-09-25 17:00:00",
   "description": "L1 Ultra-Fast JSON Cache for Vinatech POP Web Ecosystem (31 Lines, 11 Routes, 25 Errors & Fast CLI Mapping)",
@@ -660,6 +660,11 @@
       "title": "Nút Button 'Cắt điện cực' bị mờ / không sáng để bấm cắt (RULE 20)",
       "root_cause": "Logic an toàn hệ thống: Chặn nút Cắt nếu độ dày màng điện cực MaterialThickness < 100 trong STB_MaterialMaster",
       "fast_fix": "Chạy .\\mes.ps1 new-fix 'FIX_THICK' -Template thick để kiểm tra và cập nhật MaterialThickness >= 100"
+    },
+    "POP-CASE-18": {
+      "title": "OP Bắc Ninh lỡ xẻ/đóng gói chia Cuộn Mẹ Điện Cực nhầm nhà máy - Khôi phục để Hưng Yên xẻ lại",
+      "root_cause": "OP Bắc Ninh vào tab 'Đóng gói chia' trên Kiosk chốt xẻ nhầm làm sinh 10 cuộn BTP trong STB_MaterialLotInfo, chốt W-04 trên MongoToMesPerformance và khóa cuộn mẹ CompleteRoute=1, IsLineInput=0",
+      "fast_fix": "Thu hồi các cuộn BTP trong STB_MaterialLotInfo, xóa phiếu PQC, reset công đoạn W-04 về 0 trên MongoToMesPerformance, xóa đệm VINA_PACKING_REMAIN_QTY và set IsLineInput=1 trên STB_SetInfo để HY quét nạp lại cuộn mẹ"
     },
     "POP-ERR-31": {
       "title": "Lệch mốc sản lượng do chế độ SUBTRACT (Line Prod Mode)",
