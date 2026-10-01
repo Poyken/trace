@@ -30,11 +30,54 @@ interface DiagnosticsTabProps {
   initialTarget?: string;
 }
 
+function EmptyStateCard({
+  icon: Icon,
+  title,
+  description,
+  samples,
+  onSelectSample
+}: {
+  icon: any;
+  title: string;
+  description: string;
+  samples: { label: string; value: string }[];
+  onSelectSample: (val: string) => void;
+}) {
+  return (
+    <div className="glass-panel rounded-2xl p-8 text-center space-y-4 max-w-2xl mx-auto my-6 border border-slate-200 dark:border-slate-800/80 shadow-sm animate-fade-in">
+      <div className="w-14 h-14 mx-auto rounded-2xl bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-200 dark:border-cyan-800/60 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shadow-inner">
+        <Icon className="w-7 h-7" />
+      </div>
+      <div>
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">{title}</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">{description}</p>
+      </div>
+      <div className="pt-2">
+        <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">
+          Gợi ý tra cứu nhanh (1-Click):
+        </span>
+        <div className="flex flex-wrap justify-center gap-2">
+          {samples.map((s) => (
+            <button
+              key={s.value}
+              onClick={() => onSelectSample(s.value)}
+              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-cyan-50 dark:bg-slate-800/70 dark:hover:bg-cyan-950/50 border border-slate-200 dark:border-slate-700/80 hover:border-cyan-400 dark:hover:border-cyan-600 text-slate-700 dark:text-slate-300 hover:text-cyan-700 dark:hover:text-cyan-300 text-xs font-mono transition flex items-center gap-1.5 shadow-sm"
+            >
+              <span>{s.label}:</span>
+              <span className="font-bold">{s.value}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DiagnosticsTab({ initialType = 'trace', initialTarget = '' }: DiagnosticsTabProps) {
   const [subTab, setSubTab] = useState<'trace' | 'lineage' | 'locks' | 'bom' | 'pack' | 'user'>(
     (initialType as any) || 'trace'
   );
-  const [query, setQuery] = useState(initialTarget || 'VVQR232R710618');
+  const [query, setQuery] = useState(initialTarget || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedRouteIdx, setSelectedRouteIdx] = useState<number>(0);
@@ -49,20 +92,24 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
   const [packData, setPackData] = useState<PackInspectionResult | null>(null);
   const [userData, setUserData] = useState<UserInspectionResult | null>(null);
 
-  const handleSearch = async () => {
-    if (!query.trim() && subTab !== 'locks') return;
+  const handleSearch = async (targetOverride?: string) => {
+    const targetToQuery = (targetOverride !== undefined ? targetOverride : query).trim();
+    if (!targetToQuery && subTab !== 'locks') return;
+    if (targetOverride !== undefined) {
+      setQuery(targetOverride);
+    }
     setLoading(true);
     setError(null);
 
     try {
       if (subTab === 'trace' || subTab === 'bom') {
-        const res = await fetch(`/api/trace?target=${encodeURIComponent(query.trim())}`);
+        const res = await fetch(`/api/trace?target=${encodeURIComponent(targetToQuery)}`);
         if (!res.ok) throw new Error((await res.json()).error || 'Lỗi truy vấn');
         const data = await res.json();
         setTraceData(data);
         setSelectedRouteIdx(data.routeHistory?.length - 1 || 0);
       } else if (subTab === 'lineage') {
-        const res = await fetch(`/api/lineage?target=${encodeURIComponent(query.trim())}`);
+        const res = await fetch(`/api/lineage?target=${encodeURIComponent(targetToQuery)}`);
         if (!res.ok) throw new Error((await res.json()).error || 'Lỗi truy vấn');
         setLineageData(await res.json());
       } else if (subTab === 'locks') {
@@ -70,11 +117,11 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
         if (!res.ok) throw new Error((await res.json()).error || 'Lỗi kiểm tra khóa');
         setLocksData(await res.json());
       } else if (subTab === 'pack') {
-        const res = await fetch(`/api/pack?target=${encodeURIComponent(query.trim())}`);
+        const res = await fetch(`/api/pack?target=${encodeURIComponent(targetToQuery)}`);
         if (!res.ok) throw new Error((await res.json()).error || 'Lỗi truy vấn');
         setPackData(await res.json());
       } else if (subTab === 'user') {
-        const res = await fetch(`/api/user?target=${encodeURIComponent(query.trim())}`);
+        const res = await fetch(`/api/user?target=${encodeURIComponent(targetToQuery)}`);
         if (!res.ok) throw new Error((await res.json()).error || 'Lỗi truy vấn');
         setUserData(await res.json());
       }
@@ -85,10 +132,19 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
     }
   };
 
-  // Initial load
+  // Only auto-search for 'locks' when on locks subtab, or when explicit initialTarget is passed
   useEffect(() => {
-    handleSearch();
+    if (subTab === 'locks') {
+      handleSearch();
+    }
   }, [subTab, selectedLockProfile]);
+
+  useEffect(() => {
+    if (initialTarget && initialTarget.trim()) {
+      setQuery(initialTarget.trim());
+      handleSearch(initialTarget.trim());
+    }
+  }, [initialTarget]);
 
   // Auto-refresh locks
   useEffect(() => {
@@ -171,7 +227,7 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
             </button>
 
             <button
-              onClick={handleSearch}
+              onClick={() => handleSearch()}
               disabled={loading}
               className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-medium text-xs rounded-xl shadow-md shadow-cyan-600/20 transition disabled:opacity-50"
             >
@@ -240,15 +296,16 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder={
-                subTab === 'user' ? 'Nhập mã NV (92603003)...' :
-                subTab === 'pack' ? 'Nhập mã PKQR... hoặc Lot...' :
+                subTab === 'user' ? 'Nhập mã NV (32605098, 92603003)...' :
+                subTab === 'pack' ? 'Nhập mã PKQS... hoặc Lot...' :
                 subTab === 'lineage' ? 'Nhập Lot (VVQR...) hoặc PO (12 số)...' :
+                subTab === 'bom' ? 'Nhập Lot để soi định mức BOM...' :
                 'Nhập mã Lot (VVQR...) hoặc PO...'
               }
               className="bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 focus:border-cyan-500 rounded-xl px-4 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-mono w-full sm:w-72 transition"
             />
             <button
-              onClick={handleSearch}
+              onClick={() => handleSearch()}
               disabled={loading}
               className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-cyan-600/20 transition disabled:opacity-50"
             >
@@ -266,8 +323,19 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
         </div>
       )}
 
+      {loading && (
+        <div className="glass-panel rounded-2xl p-8 text-center space-y-3 animate-fade-in border border-cyan-500/20">
+          <div className="w-9 h-9 mx-auto rounded-xl bg-cyan-100 dark:bg-cyan-950/80 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+            <RefreshCw className="w-5 h-5 animate-spin" />
+          </div>
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-mono">
+            Đang chẩn đoán dữ liệu thời gian thực từ CSDL Vinatech...
+          </p>
+        </div>
+      )}
+
       {/* SUBTAB 1: TRACE 360° */}
-      {subTab === 'trace' && traceData && (
+      {subTab === 'trace' && (traceData ? (
         <div className="space-y-6 animate-fade-in">
           {/* Header Lot Summary Card */}
           <div className="glass-panel rounded-2xl p-6 relative overflow-hidden">
@@ -381,10 +449,22 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
             )}
           </div>
         </div>
-      )}
+      ) : !loading ? (
+        <EmptyStateCard
+          icon={Layers}
+          title="Chẩn Đoán Vòng Đời Lot & PO 360°"
+          description="Nhập mã Lot sản xuất hoặc PO vào ô tìm kiếm ở trên để truy vết toàn diện 360° (Single Round-Trip) qua CSDL MES và Kiosk POP."
+          samples={[
+            { label: 'Lot HY (Model 357)', value: 'VVQR223R072786' },
+            { label: 'Lot BG (Model 252)', value: 'VVQR253R018601' },
+            { label: 'Lệnh SX (PO)', value: '260828000020' }
+          ]}
+          onSelectSample={(val) => handleSearch(val)}
+        />
+      ) : null)}
 
       {/* SUBTAB 2: LINEAGE 360° HUYẾT MẠCH */}
-      {subTab === 'lineage' && lineageData && (
+      {subTab === 'lineage' && (lineageData ? (
         <div className="space-y-6 animate-fade-in">
           <div className="glass-panel rounded-2xl p-6 relative overflow-hidden">
             <div className="flex flex-wrap justify-between items-center gap-4">
@@ -453,7 +533,18 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
             ))}
           </div>
         </div>
-      )}
+      ) : !loading ? (
+        <EmptyStateCard
+          icon={GitFork}
+          title="Truy Vết Huyết Mạch 4 Trụ Cột (Supply Chain Lineage)"
+          description="Nhập mã Lot hoặc PO 12 số để mở sơ đồ phả hệ liên hệ thống (Kế hoạch PO Groupware/ERP ➔ Cấp phát kho NVL ➔ Vòng đời MES WinForm ➔ Kiosk POP xưởng)."
+          samples={[
+            { label: 'Lot HY', value: 'VVQR223R072786' },
+            { label: 'Lệnh PO', value: '260828000020' }
+          ]}
+          onSelectSample={(val) => handleSearch(val)}
+        />
+      ) : null)}
 
       {/* SUBTAB 3: LOCKS REAL-TIME */}
       {subTab === 'locks' && locksData && (
@@ -537,7 +628,7 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
       )}
 
       {/* SUBTAB 4: BOM & TỒN KHO */}
-      {subTab === 'bom' && traceData && (
+      {subTab === 'bom' && (traceData ? (
         <div className="glass-panel rounded-2xl p-6 space-y-4 animate-fade-in shadow-sm">
           <div>
             <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -584,10 +675,22 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
             </table>
           </div>
         </div>
-      )}
+      ) : !loading ? (
+        <EmptyStateCard
+          icon={Box}
+          title="Kiểm Tra BOM NVL & Tồn Kho Khả Dụng"
+          description="Nhập mã Lot hoặc PO để soi định mức tiêu hao BOM và kiểm tra tồn kho khả dụng giữa kho chuyền ROUTE_VN_WH và kho chính MAIN_VN_WH."
+          samples={[
+            { label: 'Lot HY (Model 357)', value: 'VVQR223R072786' },
+            { label: 'Lot BG (Model 252)', value: 'VVQR253R018601' },
+            { label: 'Lệnh SX (PO)', value: '260828000020' }
+          ]}
+          onSelectSample={(val) => handleSearch(val)}
+        />
+      ) : null)}
 
       {/* SUBTAB 5: PACKING */}
-      {subTab === 'pack' && packData && (
+      {subTab === 'pack' && (packData ? (
         <div className="glass-panel rounded-2xl p-6 space-y-4 animate-fade-in shadow-sm">
           <div className="flex justify-between items-center">
             <div>
@@ -612,10 +715,21 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
             </div>
           </div>
         </div>
-      )}
+      ) : !loading ? (
+        <EmptyStateCard
+          icon={Tag}
+          title="Truy Vết Đóng Thùng Carton & In Tem (PackingID)"
+          description="Nhập mã PackingID (PKQS...) hoặc mã Lot để kiểm tra chi tiết quy cách đóng gói, trạng thái in tem IsPrintAllow và tiến độ hoàn thành trên Kiosk POP."
+          samples={[
+            { label: 'PackingID Thực Tế', value: 'PKQS0101212' },
+            { label: 'Lot HY', value: 'VVQR223R072786' }
+          ]}
+          onSelectSample={(val) => handleSearch(val)}
+        />
+      ) : null)}
 
       {/* SUBTAB 6: USER 5-DB */}
-      {subTab === 'user' && userData && (
+      {subTab === 'user' && (userData ? (
         <div className="glass-panel rounded-2xl p-6 space-y-6 animate-fade-in shadow-sm">
           <div>
             <span className="text-xs text-slate-500 uppercase font-semibold">Tra Cứu Nhân Sự & Phân Quyền 5 CSDL</span>
@@ -661,7 +775,19 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
             </div>
           </div>
         </div>
-      )}
+      ) : !loading ? (
+        <EmptyStateCard
+          icon={Users}
+          title="Tra Cứu Nhân Sự & Phân Quyền 5 CSDL Đồng Bộ"
+          description="Nhập mã nhân viên (EmpNo: 8 số) hoặc tài khoản đăng nhập để kiểm tra tính đồng bộ phân quyền trên ERP NEOE, Kiosk POP, MES Core, Groupware và SSO."
+          samples={[
+            { label: 'Công nhân HY', value: '32605098' },
+            { label: 'Công nhân Đóng Thùng', value: '32512040' },
+            { label: 'Kỹ sư IT (vanduc)', value: '92603003' }
+          ]}
+          onSelectSample={(val) => handleSearch(val)}
+        />
+      ) : null)}
     </div>
   );
 }

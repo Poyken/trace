@@ -21,7 +21,7 @@ export default function Home() {
   const [quickUnlockModal, setQuickUnlockModal] = useState<{ isOpen: boolean; machine: string } | null>(null);
   const [diagInitial, setDiagInitial] = useState<{ type: string; target: string }>({
     type: 'trace',
-    target: 'VVQR232R710618'
+    target: ''
   });
 
   useEffect(() => {

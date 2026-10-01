@@ -6,7 +6,7 @@ import SqlApprovalModal from '@/components/SqlApprovalModal';
 
 export default function HotfixTab() {
   const [template, setTemplate] = useState<string>('swap');
-  const [targetLot, setTargetLot] = useState('VVQR232R710618');
+  const [targetLot, setTargetLot] = useState('');
   const [targetMachine, setTargetMachine] = useState('VVMHY130');
   const [targetDate, setTargetDate] = useState('2026-09-26');
   const [boxId, setBoxId] = useState('BX-2609-0091');
@@ -302,6 +302,7 @@ ROLLBACK TRAN;
             <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Mã Lot / PackingID:</label>
             <input
               type="text"
+              placeholder="VD: VVQR223R072786"
               value={targetLot}
               onChange={(e) => setTargetLot(e.target.value)}
               className="mt-1 w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-cyan-700 dark:text-cyan-300 font-bold focus:border-cyan-500 outline-none transition"
