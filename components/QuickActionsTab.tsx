@@ -306,6 +306,123 @@ WHERE LotID = '${lot}' AND RepairQty IS NULL;
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
 -- COMMIT TRAN;`
+    },
+    {
+      id: 'b552',
+      title: 'B552: Xóa Cuộn Điện Cực & Reset LineInput',
+      tag: 'MES ĐIỆN CỰC',
+      tagColor: 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800',
+      description: 'Xóa lượt chốt chia cuộn/mẻ trộn B552 và khôi phục IsLineInput = 1 trên cuộn mẹ để tái sử dụng.',
+      icon: Trash2,
+      targetDb: 'SmartFactoryV2',
+      defaultInputs: { lot: selectedLot },
+      sqlGenerator: ({ lot }) => `-- ======================================================================
+-- HOTFIX: XOA CUON DIEN CUC B552 & RESET ISLINEINPUT CUON ME (TRAP 4)
+-- Tac gia: Nguyen Van Duc (vanduc - EA Team)
+-- ======================================================================
+BEGIN TRAN;
+
+-- 1. Xoa luot chot chia cuon khoi STB_ProdRouteHist
+DELETE FROM SmartFactoryV2.dbo.STB_ProdRouteHist
+WHERE LotID = '${lot}';
+
+-- 2. Khoi phuc trang thai IsLineInput cho cuon me de cho phep nap vao me moi
+UPDATE SmartFactoryV2.dbo.STB_MaterialLotInfo
+SET IsLineInput = 1,
+    Status = 'NORMAL',
+    ChangeUserID = 'vanduc',
+    ChangeDate = GETDATE()
+WHERE LotID = (
+    SELECT TOP 1 RawMaterialLotID 
+    FROM SmartFactoryV2.dbo.STB_MaterialLotInfo 
+    WHERE LotID = '${lot}' AND RawMaterialLotID IS NOT NULL
+);
+
+SELECT @@ROWCOUNT AS [RowsAffected];
+ROLLBACK TRAN;
+-- COMMIT TRAN;`
+    },
+    {
+      id: 'cancel_pack',
+      title: 'Hủy Lẻ Box Đóng Gói (B523/HN523)',
+      tag: 'MES ĐÓNG GÓI',
+      tagColor: 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800',
+      description: 'Hủy lẻ từng Box mà không hủy hỏng toàn bộ PackingID hoặc lệch tồn VINA_PACKING_REMAIN_QTY.',
+      icon: Trash2,
+      targetDb: 'SmartFactoryV2',
+      defaultInputs: { lot: selectedLot, boxId: selectedBoxId },
+      sqlGenerator: ({ lot, boxId }) => `-- ======================================================================
+-- HOTFIX: HUY LE TUNG BOX DONG GOI MA KHONG MAT PACKINGID (TRAP 6)
+-- Tac gia: Nguyen Van Duc (vanduc - EA Team)
+-- ======================================================================
+BEGIN TRAN;
+
+-- 1. Xoa lien ket Box khoi chi tiet chung tu dong goi
+DELETE FROM SmartFactoryV2.dbo.STB_MaterialDocLotInfo
+WHERE LotID = '${lot}' AND BoxID = '${boxId}';
+
+-- 2. Cap nhat giam so luong da dong goi tren STB_ProdRouteHist
+UPDATE SmartFactoryV2.dbo.STB_ProdRouteHist
+SET ChangeUserID = 'vanduc',
+    ChangeDate = GETDATE()
+WHERE LotID = '${lot}'
+  AND RouteOrder = (SELECT MAX(RouteOrder) FROM SmartFactoryV2.dbo.STB_ProdRouteHist WHERE LotID = '${lot}');
+
+SELECT @@ROWCOUNT AS [RowsAffected];
+ROLLBACK TRAN;
+-- COMMIT TRAN;`
+    },
+    {
+      id: 'lineinput',
+      title: 'Kích Hoạt Lại IsLineInput = 1',
+      tag: 'MES NVL',
+      tagColor: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800',
+      description: 'Mở khóa Lot/cuộn NVL bị kẹt cờ IsLineInput=0 không thể nạp vào dây chuyền sản xuất.',
+      icon: CheckCircle2,
+      targetDb: 'SmartFactoryV2',
+      defaultInputs: { lot: selectedLot },
+      sqlGenerator: ({ lot }) => `-- ======================================================================
+-- HOTFIX: MO KHOA ISLINEINPUT = 1 CHO LOT BI KET KHONG VAO DUOC CHUYEN
+-- Tac gia: Nguyen Van Duc (vanduc - EA Team)
+-- ======================================================================
+BEGIN TRAN;
+
+UPDATE SmartFactoryV2.dbo.STB_MaterialLotInfo
+SET IsLineInput = 1,
+    Status = 'NORMAL',
+    ChangeUserID = 'vanduc',
+    ChangeDate = GETDATE()
+WHERE LotID = '${lot}';
+
+SELECT @@ROWCOUNT AS [RowsAffected];
+ROLLBACK TRAN;
+-- COMMIT TRAN;`
+    },
+    {
+      id: 'pack_reprint',
+      title: 'PackingID: Mở Quyền In Lại Tem Thùng',
+      tag: 'MES IN TEM',
+      tagColor: 'bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-300 border-cyan-300 dark:border-cyan-800',
+      description: 'Cho phép in lại tem thùng Sanmina/Vinatech khi tem bị mờ/hỏng mà không sinh đúp mã PackingID.',
+      icon: RefreshCw,
+      targetDb: 'SmartFactoryV2',
+      defaultInputs: { lot: selectedLot },
+      sqlGenerator: ({ lot }) => `-- ======================================================================
+-- HOTFIX: MO QUYEN IN LAI TEM PACKINGID KHONG SINH MA TRUNG
+-- Tac gia: Nguyen Van Duc (vanduc - EA Team)
+-- ======================================================================
+BEGIN TRAN;
+
+UPDATE SmartFactoryV2.dbo.STB_PackingMaster
+SET IsPrintAllow = 1,
+    PrintCount = PrintCount + 1,
+    ChangeUserID = 'vanduc',
+    ChangeDate = GETDATE()
+WHERE PackingID = '${lot}' OR LotID = '${lot}';
+
+SELECT @@ROWCOUNT AS [RowsAffected];
+ROLLBACK TRAN;
+-- COMMIT TRAN;`
     }
   ];
 

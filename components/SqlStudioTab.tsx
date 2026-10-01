@@ -204,6 +204,28 @@ export default function SqlStudioTab() {
       return;
     }
 
+    const upper = targetSql.toUpperCase();
+    const isDangerous = /\b(UPDATE|DELETE|DROP|ALTER|TRUNCATE|INSERT)\b/i.test(upper);
+    const hasTran = /\bBEGIN\s+(TRAN|TRANSACTION)\b/i.test(upper);
+
+    // Trap 8 / Rule 1: No naked DML on Production
+    if (isDangerous && !hasTran) {
+      setErrorMsg('🛡️ VI PHẠM QUY TẮC RULE 1 (AN TOÀN CSDL): Cấm chạy lệnh sửa đổi (UPDATE/DELETE/INSERT...) trần trên Production. Bắt buộc bấm nút "Bọc Transaction" để bọc trong BEGIN TRAN ... ROLLBACK trước khi chạy!');
+      return;
+    }
+
+    // Trap 2 / Rule 11: Never touch STB_SetInfo
+    if ((/\b(UPDATE|DELETE)\s+.*STB_SetInfo\b/i.test(upper)) || (/\bFROM\s+.*STB_SetInfo\b/i.test(upper) && isDangerous)) {
+      setErrorMsg('❌ VI PHẠM QUY TẮC RULE 11 NGHIÊM TRỌNG: Tuyệt đối CẤM sửa đổi hoặc xóa trên bảng STB_SetInfo khi Rollback! Hành động này sẽ hủy hoại mã Barcode và định danh Lot ban đầu. Hãy rollback qua STB_ProdRouteHist và STB_DefectRepairInfo.');
+      return;
+    }
+
+    // Trap 1 / Rule 20.1: Swap machine must update both tables
+    if (/\bUPDATE\s+.*STB_ProdRouteHist\b/i.test(upper) && /\bMachineCode\b/i.test(upper) && !upper.includes('MONGOTOMESPERFORMANCE')) {
+      setErrorMsg('⚠️ CẢNH BÁO RULE 20.1 (ĐỔI MÁY POP): Đổi máy Kiosk bắt buộc phải UPDATE đồng thời cả 2 bảng STB_ProdRouteHist VÀ MongoToMesPerformance. Nếu chỉ update 1 bảng, Background Sync của POP sẽ tự động ghi đè lại máy cũ! Hãy sử dụng template chuẩn tại tab Cấp Cứu 1-Click.');
+      return;
+    }
+
     setIsLoading(true);
     setErrorMsg(null);
 
