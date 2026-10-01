@@ -15,7 +15,8 @@ export function getRelayHeaders(): Record<string, string> {
   const secret = process.env.MES_RELAY_SECRET || 'vinatech_secret_token_2026';
   return {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${secret}`
+    'Authorization': `Bearer ${secret}`,
+    'bypass-tunnel-reminder': 'true'
   };
 }
 
