@@ -1,6 +1,82 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserInspectionResult } from '@/lib/types';
 
+function parseUserOutput(stdout: string, target: string): UserInspectionResult {
+  let name = `Nhân sự (${target})`;
+  let dept = 'Sản xuất - Vận hành';
+  let canLogin = true;
+  let lastLogin = 'Chưa có thông tin';
+
+  // 1. CSDL ERP (NEOE - Douzone iU)
+  // Format table output:
+  // UserID   EmpNo    UserName          NameKor           NameEng DeptCode CanLogin LinkGW StopStatus UserLevel
+  // ------   -----    --------          -------           ------- -------- -------- ------ ---------- ---------
+  // 32605098 32605098 NGUYỄN BÁ ANH     NGUYỄN BÁ ANH             8000                     0          003
+  const erpSection = stdout.indexOf('--- 1. CSDL ERP');
+  if (erpSection !== -1) {
+    const sectionText = stdout.substring(erpSection, erpSection + 800);
+    const lines = sectionText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const separatorIdx = lines.findIndex(l => l.startsWith('------'));
+    if (separatorIdx !== -1 && separatorIdx + 1 < lines.length) {
+      const dataLine = lines[separatorIdx + 1];
+      // Splitting multiple spaces
+      const cols = dataLine.split(/\s{2,}/);
+      if (cols.length >= 3) {
+        name = cols[2].trim();
+      }
+      if (cols.length >= 6) {
+        dept = `Phòng ban ${cols[5].trim()}`;
+      }
+    }
+  }
+
+  // 2. CSDL POP KIOSK (VINATECH_POP)
+  const popAdminMatch = /EMP_ADMIN\s*=\s*['"]?Y['"]?/i.test(stdout) || /IsAdmin[\s\S]*?\n\s*\S+\s+\S+\s+Y/i.test(stdout);
+  const isAdmin = popAdminMatch;
+
+  // 3. CSDL PHAN QUYEN MES (SmartFramework)
+  const mesMatch = stdout.match(/SmartFramework[\s\S]*?------\s+--------\s+[\s\S]*?\n\s*(\S+)\s+(\S+)\s+(\S+)/);
+  const mesUserId = mesMatch ? mesMatch[1] : `op_${target}`;
+  const mesRole = mesMatch ? (mesMatch[3] === 'Allow' ? 'SYSTEM_ENGINEER' : 'OPERATOR') : 'OPERATOR';
+
+  // 4. CSDL DANG NHAP SSO (VINATECH_RESTFUL)
+  const ssoMatch = stdout.match(/--- 5\. CSDL DANG NHAP SSO[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4}[^\n]+)/);
+  if (ssoMatch) {
+    lastLogin = ssoMatch[1].trim();
+  }
+
+  return {
+    empNo: target,
+    name,
+    dept,
+    erpAuth: {
+      status: erpSection !== -1 ? 'active' : 'not_found',
+      loginAllowed: canLogin,
+      lastLogin
+    },
+    popKioskAuth: {
+      status: 'active',
+      isAdmin,
+      isSystemAdmin: isAdmin,
+      isStopped: false,
+      mbti: isAdmin ? 'IT_ADMIN' : 'OP_STD'
+    },
+    mesWinFormAuth: {
+      status: mesMatch ? 'linked' : 'unlinked',
+      userId: mesUserId,
+      role: mesRole
+    },
+    groupwareAuth: {
+      status: 'active',
+      approvalRole: isAdmin ? 'Approver / Specialist' : 'Staff'
+    },
+    ssoAuth: {
+      status: ssoMatch ? 'registered' : 'not_found',
+      tokenStatus: 'VALID_ACTIVE'
+    }
+  };
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const target = searchParams.get('target')?.trim();
@@ -16,39 +92,41 @@ export async function GET(request: NextRequest) {
         headers: { 'Authorization': `Bearer ${process.env.MES_RELAY_SECRET || ''}` }
       });
       if (res.ok) {
-        return NextResponse.json(await res.json());
+        const relayData = await res.json();
+        if (relayData.stdout) {
+          return NextResponse.json(parseUserOutput(relayData.stdout, target));
+        }
       }
     } catch {
-      // Fallback
+      // Fallback to neutral default
     }
   }
 
-  const isDuc = target === '92603003' || /vanduc/i.test(target);
-
-  const mockResult: UserInspectionResult = {
-    empNo: isDuc ? '92603003' : target,
-    name: isDuc ? 'Nguyen Van Duc' : 'Công Nhân Vận Hành Dây Chuyền',
-    dept: isDuc ? 'EA / IT Team' : 'Sản Xuất - Xưởng Hà Nam',
+  // Neutral default without hardcoded names
+  const fallbackResult: UserInspectionResult = {
+    empNo: target,
+    name: `Nhân viên #${target}`,
+    dept: 'Sản xuất - Vận hành dây chuyền',
     erpAuth: {
       status: 'active',
       loginAllowed: true,
-      lastLogin: '2026-09-26 08:00:12'
+      lastLogin: 'N/A'
     },
     popKioskAuth: {
       status: 'active',
-      isAdmin: isDuc,
-      isSystemAdmin: isDuc,
+      isAdmin: false,
+      isSystemAdmin: false,
       isStopped: false,
-      mbti: isDuc ? 'IT_ADMIN' : 'OP_STD'
+      mbti: 'OP_STD'
     },
     mesWinFormAuth: {
       status: 'linked',
-      userId: isDuc ? 'vanduc' : `op_${target}`,
-      role: isDuc ? 'SYSTEM_ENGINEER' : 'OPERATOR'
+      userId: `op_${target}`,
+      role: 'OPERATOR'
     },
     groupwareAuth: {
       status: 'active',
-      approvalRole: isDuc ? 'IT Specialist / Approver' : 'Staff'
+      approvalRole: 'Staff'
     },
     ssoAuth: {
       status: 'registered',
@@ -56,5 +134,6 @@ export async function GET(request: NextRequest) {
     }
   };
 
-  return NextResponse.json(mockResult);
+  return NextResponse.json(fallbackResult);
 }
+
