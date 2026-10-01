@@ -17,8 +17,14 @@ export default function CommandPalette({ isOpen, onClose, onSelectAction }: Comm
 
   useEffect(() => {
     if (isOpen) {
-      fetch('/api/screens').then(res => res.json()).then(data => setScreens(data.screens || []));
-      fetch('/api/pop-errors').then(res => res.json()).then(data => setPopErrors(data.errors || []));
+      fetch('/api/screens')
+        .then(res => res.json())
+        .then(data => setScreens(data.screens || []))
+        .catch(err => console.warn('Screens fetch error:', err));
+      fetch('/api/pop-errors')
+        .then(res => res.json())
+        .then(data => setPopErrors(data.errors || []))
+        .catch(err => console.warn('Pop-errors fetch error:', err));
     }
   }, [isOpen]);
 

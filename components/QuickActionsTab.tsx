@@ -44,10 +44,10 @@ interface QuickActionConfig {
 }
 
 export default function QuickActionsTab() {
-  const [selectedLot, setSelectedLot] = useState('VVQR232R710618');
-  const [selectedMachine, setSelectedMachine] = useState('VVMHY130');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [selectedBoxId, setSelectedBoxId] = useState('BX-2609-0091');
+  const [selectedLot, setSelectedLot] = useState('');
+  const [selectedMachine, setSelectedMachine] = useState('');
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [selectedBoxId, setSelectedBoxId] = useState('');
   const [searchAction, setSearchAction] = useState('');
   const [copiedActionId, setCopiedActionId] = useState<string | null>(null);
 
@@ -86,9 +86,8 @@ export default function QuickActionsTab() {
   };
 
   const sampleLots = [
-    { lot: 'VVQR232R710618', machine: 'VVMHY130', desc: 'Lot EDLC 10F Line HY-02' },
-    { lot: 'VVQR232R710619', machine: 'VVMHY120', desc: 'Lot EDLC 10F Line HY-01' },
-    { lot: 'VVQR232R710601', machine: 'VVMHY110', desc: 'Lot Cần chuyển ngày B782' },
+    { lot: 'VVQR223R072786', machine: 'VVMHY147', desc: 'Lot EDLC 357 Line HY-01' },
+    { lot: 'VVQR253R018601', machine: 'VVMHY130', desc: 'Lot EDLC 252 Line BG' },
     { lot: 'SOL-150KG-09', machine: '', desc: 'Thùng dung dịch 150kg' }
   ];
 
@@ -310,7 +309,33 @@ ROLLBACK TRAN;
     }
   ];
 
+  const validateInputs = (action: QuickActionConfig): boolean => {
+    if (action.id !== 'unlock' && !selectedLot.trim()) {
+      setStatusMessage({
+        text: `⚠️ Vui lòng nhập Mã Lot trước khi thao tác "${action.title}"`,
+        type: 'error'
+      });
+      return false;
+    }
+    if ((action.id === 'swap' || action.id === 'unlock') && !selectedMachine.trim()) {
+      setStatusMessage({
+        text: `⚠️ Vui lòng nhập Mã Máy (Thiết bị) trước khi thao tác "${action.title}"`,
+        type: 'error'
+      });
+      return false;
+    }
+    if (action.id === 'cancel_pack' && !selectedBoxId.trim()) {
+      setStatusMessage({
+        text: `⚠️ Vui lòng nhập Mã Thùng (BoxID) trước khi thao tác "${action.title}"`,
+        type: 'error'
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleCopySql = (action: QuickActionConfig) => {
+    if (!validateInputs(action)) return;
     const sql = action.sqlGenerator({
       lot: selectedLot,
       machine: selectedMachine,
@@ -323,6 +348,7 @@ ROLLBACK TRAN;
   };
 
   const handleOpenModal = (action: QuickActionConfig) => {
+    if (!validateInputs(action)) return;
     const sql = action.sqlGenerator({
       lot: selectedLot,
       machine: selectedMachine,
@@ -338,6 +364,7 @@ ROLLBACK TRAN;
   };
 
   const handle1ClickExecute = async (action: QuickActionConfig, mode: 'dry_run' | 'commit') => {
+    if (!validateInputs(action)) return;
     setExecutingActionId(action.id);
     setStatusMessage(null);
 
@@ -477,7 +504,7 @@ ROLLBACK TRAN;
               value={selectedLot}
               onChange={(e) => setSelectedLot(e.target.value.trim().toUpperCase())}
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-cyan-500 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-cyan-700 dark:text-cyan-300 outline-none transition"
-              placeholder="VVQR..."
+              placeholder="VD: VVQR223R072786..."
             />
           </div>
 
@@ -488,7 +515,7 @@ ROLLBACK TRAN;
               value={selectedMachine}
               onChange={(e) => setSelectedMachine(e.target.value.trim().toUpperCase())}
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-cyan-500 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-cyan-700 dark:text-cyan-300 outline-none transition"
-              placeholder="VVMHY..."
+              placeholder="VD: VVMHY147..."
             />
           </div>
 
@@ -509,7 +536,7 @@ ROLLBACK TRAN;
               value={selectedBoxId}
               onChange={(e) => setSelectedBoxId(e.target.value.trim().toUpperCase())}
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-cyan-500 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-800 dark:text-slate-200 outline-none transition"
-              placeholder="BX-..."
+              placeholder="VD: BX-2609-0091..."
             />
           </div>
         </div>
@@ -569,9 +596,19 @@ ROLLBACK TRAN;
                   </p>
 
                   <div className="mt-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 text-[11px] font-mono text-slate-600 dark:text-slate-400 space-y-0.5">
-                    <div className="truncate"><span className="text-slate-400">Lot:</span> <b className="text-cyan-600 dark:text-cyan-400">{selectedLot}</b></div>
+                    <div className="truncate">
+                      <span className="text-slate-400">Lot:</span>{' '}
+                      <b className={selectedLot ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-400 dark:text-slate-500 font-normal italic'}>
+                        {selectedLot || '(Chưa điền)'}
+                      </b>
+                    </div>
                     {action.id === 'swap' || action.id === 'unlock' ? (
-                      <div className="truncate"><span className="text-slate-400">Máy:</span> <b className="text-cyan-600 dark:text-cyan-400">{selectedMachine}</b></div>
+                      <div className="truncate">
+                        <span className="text-slate-400">Máy:</span>{' '}
+                        <b className={selectedMachine ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-400 dark:text-slate-500 font-normal italic'}>
+                          {selectedMachine || '(Chưa điền)'}
+                        </b>
+                      </div>
                     ) : null}
                     {action.id === 'b782' ? (
                       <div className="truncate"><span className="text-slate-400">Giờ ra:</span> <b className="text-amber-600 dark:text-amber-400">{selectedDate} 10:00</b></div>

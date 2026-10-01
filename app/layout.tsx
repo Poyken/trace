@@ -17,13 +17,18 @@ export const metadata: Metadata = {
   description: "Hệ Thống Điều Hành & Chẩn Đoán Sản Xuất 360° Vinatech MES & POP Kiosk (Nguyen Van Duc - EA Team)",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="vi"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body suppressHydrationWarning className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

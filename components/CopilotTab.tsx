@@ -19,7 +19,7 @@ export default function CopilotTab({ onNavigateToDiagnostics }: CopilotTabProps)
 Tôi là **Vinatech MES Operations Copilot**. Tôi đã được trang bị đầy đủ tri thức về 95 màn hình WinForm, Stored Procedures, và 5 CSDL nghiệp vụ.
 
 Mọi phân tích lỗi tại đây đều tuân thủ nghiêm ngặt **Quy chuẩn 4 Dòng Vàng** và **Rule 20 (EA Playbook)**. Anh có thể nhập mã Lot, tên màn hình, lỗi Kiosk hoặc chọn nhanh các tình huống mẫu bên dưới:`,
-      timestamp: new Date().toLocaleTimeString('vi-VN')
+      timestamp: 'Hệ thống sẵn sàng'
     }
   ]);
   const [input, setInput] = useState('');
