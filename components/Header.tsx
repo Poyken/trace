@@ -23,8 +23,9 @@ export default function Header({
     { id: 'copilot', label: 'AI Operations Copilot' },
     { id: 'dashboard', label: 'Live Dashboard' },
     { id: 'diagnostics', label: 'Diagnostics 360°' },
+    { id: 'sql_studio', label: '💻 SQL Studio' },
     { id: 'weekly_report', label: '📋 Báo Cáo Tuần IT' },
-    { id: 'knowledge', label: 'Ma Trận & Console SQL' },
+    { id: 'knowledge', label: 'Ma Trận & KB' },
     { id: 'hotfix', label: 'Hotfix Console' },
     { id: 'settings', label: 'Cấu hình & Relay' }
   ];

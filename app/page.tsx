@@ -10,6 +10,7 @@ import WeeklyReportTab from '@/components/WeeklyReportTab';
 import KnowledgeTab from '@/components/KnowledgeTab';
 import HotfixTab from '@/components/HotfixTab';
 import SettingsTab from '@/components/SettingsTab';
+import SqlStudioTab from '@/components/SqlStudioTab';
 import CommandPalette from '@/components/CommandPalette';
 import FloatingSpeedDial from '@/components/FloatingSpeedDial';
 import SqlApprovalModal from '@/components/SqlApprovalModal';
@@ -68,6 +69,9 @@ export default function Home() {
       } else if ((e.ctrlKey || e.metaKey) && e.key === '8') {
         e.preventDefault();
         setActiveTab('settings');
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '9') {
+        e.preventDefault();
+        setActiveTab('sql_studio');
       }
     };
 
@@ -138,6 +142,7 @@ export default function Home() {
             initialTarget={diagInitial.target}
           />
         )}
+        {activeTab === 'sql_studio' && <SqlStudioTab />}
         {activeTab === 'weekly_report' && <WeeklyReportTab />}
         {activeTab === 'knowledge' && <KnowledgeTab />}
         {activeTab === 'hotfix' && <HotfixTab />}

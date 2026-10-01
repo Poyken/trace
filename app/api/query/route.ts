@@ -27,10 +27,17 @@ export async function POST(request: NextRequest) {
     const relayRes = await fetchFromRelay('/api/query', {
       method: 'POST',
       body: { query: trimmed, profile },
-      timeoutMs: 4000
+      timeoutMs: 15000
     });
 
     if (relayRes.success && relayRes.data) {
+      if ((relayRes.data as any).error && !(relayRes.data as any).success) {
+        return NextResponse.json({
+          error: (relayRes.data as any).error,
+          success: false,
+          profile
+        }, { status: 400 });
+      }
       return NextResponse.json(relayRes.data);
     }
 

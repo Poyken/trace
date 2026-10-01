@@ -7,8 +7,10 @@
 
 export function getRelayBaseUrl(): string | null {
   const url = process.env.MES_RELAY_URL;
-  if (!url) return null;
-  return url.trim().replace(/\/+$/, '');
+  if (url && !url.includes('loca.lt')) {
+    return url.trim().replace(/\/+$/, '');
+  }
+  return 'http://127.0.0.1:5000';
 }
 
 export function getRelayHeaders(): Record<string, string> {
@@ -30,39 +32,45 @@ export async function fetchFromRelay<T = any>(
     timeoutMs?: number;
   } = {}
 ): Promise<{ success: boolean; data?: T; error?: string }> {
-  const baseUrl = getRelayBaseUrl();
-  if (!baseUrl) {
-    return { success: false, error: 'NO_RELAY_CONFIGURED' };
-  }
+  const primaryUrl = getRelayBaseUrl();
+  const urlsToTry: string[] = [];
+  if (primaryUrl) urlsToTry.push(primaryUrl);
+  if (!urlsToTry.includes('http://127.0.0.1:5000')) urlsToTry.push('http://127.0.0.1:5000');
 
   const { method = 'GET', body, timeoutMs = 15000 } = options;
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const targetUrl = `${baseUrl}${cleanEndpoint}`;
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  let lastError = 'NO_RELAY_AVAILABLE';
 
-    const res = await fetch(targetUrl, {
-      method,
-      headers: getRelayHeaders(),
-      body: body ? JSON.stringify(body) : undefined,
-      signal: controller.signal,
-      cache: 'no-store'
-    });
+  for (const baseUrl of urlsToTry) {
+    const targetUrl = `${baseUrl}${cleanEndpoint}`;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    clearTimeout(timeoutId);
+      const res = await fetch(targetUrl, {
+        method,
+        headers: getRelayHeaders(),
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+        cache: 'no-store'
+      });
 
-    if (!res.ok) {
-      return { success: false, error: `Relay responded with HTTP ${res.status}` };
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        lastError = `Relay responded with HTTP ${res.status}`;
+        continue;
+      }
+
+      const data = await res.json();
+      return { success: true, data };
+    } catch (err: any) {
+      lastError = err.name === 'AbortError'
+        ? `Relay request timed out (>${timeoutMs / 1000}s)`
+        : err.message;
     }
-
-    const data = await res.json();
-    return { success: true, data };
-  } catch (err) {
-    const errorMsg = (err as Error).name === 'AbortError' 
-      ? `Relay request timed out (>${timeoutMs / 1000}s)` 
-      : (err as Error).message;
-    return { success: false, error: errorMsg };
   }
+
+  return { success: false, error: lastError };
 }
