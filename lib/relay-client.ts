@@ -16,7 +16,9 @@ export function getRelayHeaders(): Record<string, string> {
   return {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${secret}`,
-    'bypass-tunnel-reminder': 'true'
+    'Bypass-Tunnel-Reminder': 'true',
+    'bypass-tunnel-reminder': 'true',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
   };
 }
 
@@ -33,7 +35,7 @@ export async function fetchFromRelay<T = any>(
     return { success: false, error: 'NO_RELAY_CONFIGURED' };
   }
 
-  const { method = 'GET', body, timeoutMs = 4000 } = options;
+  const { method = 'GET', body, timeoutMs = 15000 } = options;
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const targetUrl = `${baseUrl}${cleanEndpoint}`;
 
@@ -59,7 +61,7 @@ export async function fetchFromRelay<T = any>(
     return { success: true, data };
   } catch (err) {
     const errorMsg = (err as Error).name === 'AbortError' 
-      ? 'Relay request timed out (>4s)' 
+      ? `Relay request timed out (>${timeoutMs / 1000}s)` 
       : (err as Error).message;
     return { success: false, error: errorMsg };
   }

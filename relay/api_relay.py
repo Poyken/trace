@@ -12,6 +12,11 @@ import os
 import subprocess
 import urllib.parse
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
+
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
 
 PORT = int(os.environ.get("MES_RELAY_PORT", 5000))
 SECRET_TOKEN = os.environ.get("MES_RELAY_SECRET", "vinatech_secret_token_2026")
@@ -213,7 +218,6 @@ class RelayHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self.send_response(400)
                 self._send_cors_headers()
-                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
         elif parsed.path == "/api/deploy":
@@ -282,7 +286,7 @@ class RelayHandler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     print(f"[*] Starting Vinatech MES Relay Server on port {PORT}...")
     print(f"[*] Workspace: {WORKSPACE_DIR}")
-    server = HTTPServer(("0.0.0.0", PORT), RelayHandler)
+    server = ThreadedHTTPServer(("0.0.0.0", PORT), RelayHandler)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
