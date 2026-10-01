@@ -1,24 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LineageResult } from '@/lib/types';
+import { fetchFromRelay } from '@/lib/relay-client';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const target = searchParams.get('target') || 'VVQR232R710618';
 
-  const relayUrl = process.env.MES_RELAY_URL;
-  if (relayUrl) {
-    try {
-      const res = await fetch(`${relayUrl}/api/lineage?target=${encodeURIComponent(target)}`, {
-        headers: { 'Authorization': `Bearer ${process.env.MES_RELAY_SECRET || ''}` },
-        cache: 'no-store'
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return NextResponse.json(data);
-      }
-    } catch {
-      // Fallback
-    }
+  const relayRes = await fetchFromRelay(`/api/lineage?target=${encodeURIComponent(target)}`, {
+    method: 'GET',
+    timeoutMs: 15000
+  });
+
+  if (relayRes.success && relayRes.data) {
+    return NextResponse.json(relayRes.data);
   }
 
   // Realistic Lineage 360° Result

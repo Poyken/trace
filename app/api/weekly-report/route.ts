@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WeeklyTaskItem } from '@/lib/types';
+import { fetchFromRelay } from '@/lib/relay-client';
 
 const INITIAL_WEEKLY_TASKS: WeeklyTaskItem[] = [
   {
@@ -75,19 +76,13 @@ export async function GET(request: NextRequest) {
   const startDate = searchParams.get('startDate') || '2026-09-28';
   const endDate = searchParams.get('endDate') || '2026-10-02';
 
-  const relayUrl = process.env.MES_RELAY_URL;
-  if (relayUrl) {
-    try {
-      const res = await fetch(`${relayUrl}/api/weekly-report?startDate=${startDate}&endDate=${endDate}`, {
-        headers: { 'Authorization': `Bearer ${process.env.MES_RELAY_SECRET || ''}` },
-        cache: 'no-store'
-      });
-      if (res.ok) {
-        return NextResponse.json(await res.json());
-      }
-    } catch {
-      // Fallback
-    }
+  const relayRes = await fetchFromRelay(`/api/weekly-report?startDate=${startDate}&endDate=${endDate}`, {
+    method: 'GET',
+    timeoutMs: 15000
+  });
+
+  if (relayRes.success && relayRes.data) {
+    return NextResponse.json(relayRes.data);
   }
 
   // Calculate statistics according to Rule 22

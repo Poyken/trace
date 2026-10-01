@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserInspectionResult } from '@/lib/types';
+import { fetchFromRelay } from '@/lib/relay-client';
 
 function parseUserOutput(stdout: string, target: string): UserInspectionResult {
   let name = `Nhân sự (${target})`;
@@ -85,20 +86,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Vui lòng cung cấp mã nhân viên (EmpNo) hoặc tên tài khoản.' }, { status: 400 });
   }
 
-  const relayUrl = process.env.MES_RELAY_URL;
-  if (relayUrl) {
-    try {
-      const res = await fetch(`${relayUrl}/api/user?target=${encodeURIComponent(target)}`, {
-        headers: { 'Authorization': `Bearer ${process.env.MES_RELAY_SECRET || ''}` }
-      });
-      if (res.ok) {
-        const relayData = await res.json();
-        if (relayData.stdout) {
-          return NextResponse.json(parseUserOutput(relayData.stdout, target));
-        }
-      }
-    } catch {
-      // Fallback to neutral default
+  const relayRes = await fetchFromRelay(`/api/user?target=${encodeURIComponent(target)}`, {
+    method: 'GET',
+    timeoutMs: 15000
+  });
+
+  if (relayRes.success && relayRes.data) {
+    const relayData = relayRes.data;
+    if (relayData.stdout) {
+      return NextResponse.json(parseUserOutput(relayData.stdout, target));
     }
   }
 

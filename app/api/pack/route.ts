@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PackInspectionResult } from '@/lib/types';
+import { fetchFromRelay } from '@/lib/relay-client';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -9,15 +10,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Vui lòng cung cấp mã Lot hoặc PackingID.' }, { status: 400 });
   }
 
-  const relayUrl = process.env.MES_RELAY_URL;
-  if (relayUrl) {
-    try {
-      const res = await fetch(`${relayUrl}/api/pack?target=${encodeURIComponent(target)}`, {
-        headers: { 'Authorization': `Bearer ${process.env.MES_RELAY_SECRET || ''}` }
-      });
-      if (res.ok) {
-        const relayData = await res.json();
-        if (relayData.stdout) {
+  const relayRes = await fetchFromRelay(`/api/pack?target=${encodeURIComponent(target)}`, {
+    method: 'GET',
+    timeoutMs: 15000
+  });
+
+  if (relayRes.success && relayRes.data) {
+    const relayData = relayRes.data;
+    if (relayData.stdout) {
           const stdout = relayData.stdout;
           const lotMatch = stdout.match(/Barcode\s+([A-Za-z0-9_-]+)/i) || stdout.match(/LotNo\s*:\s*([A-Za-z0-9_-]+)/i);
           const pkMatch = stdout.match(/PackingID\s+([A-Za-z0-9_-]+)/i) || stdout.match(/PackingID\s*hien\s*tai:\s*([A-Za-z0-9_-]+)/i);
@@ -41,10 +41,6 @@ export async function GET(request: NextRequest) {
           });
         }
       }
-    } catch {
-      // Fallback
-    }
-  }
 
   const isPackingId = target.toUpperCase().startsWith('PK');
   const fallbackResult: PackInspectionResult = {
