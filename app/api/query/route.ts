@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchFromRelay } from '@/lib/relay-client';
+import { MOCK_HEALTH_DATA } from '@/lib/knowledge';
 
 export async function POST(request: NextRequest) {
   try {
@@ -83,23 +84,43 @@ export async function POST(request: NextRequest) {
     ];
 
     if (upper.includes('VINA_EQUIPMENT_MAPPING')) {
-      columns = ['EQUIPMENT_ID', 'EQUIPMENT_NAME', 'MAPPING_STATUS', 'DAYPLAN_ID', 'LINE_CODE', 'CREATED_AT'];
+      columns = [
+        'MAPPING_ID',
+        'DAY_PLAN_NO',
+        'LINE_CODE',
+        'ROUTE_CODE',
+        'EQUIPMENT_ID',
+        'EQUIPMENT_NAME',
+        'MAPPING_STATUS',
+        'MAPPED_AT',
+        'RELEASED_AT',
+        'RELEASE_REASON'
+      ];
+      const mockMachines = MOCK_HEALTH_DATA?.activeEquipmentLocks?.machines || [];
+      rows = mockMachines.map((m, idx) => ({
+        MAPPING_ID: 1000 + idx,
+        DAY_PLAN_NO: m.dayPlanNo,
+        LINE_CODE: m.lineCode,
+        ROUTE_CODE: m.routeCode,
+        EQUIPMENT_ID: m.equipmentId,
+        EQUIPMENT_NAME: m.equipmentName,
+        MAPPING_STATUS: 'ACTIVE',
+        MAPPED_AT: m.mappedAt,
+        RELEASED_AT: null,
+        RELEASE_REASON: null
+      }));
+    } else if (upper.includes('MONGOTOMESPERFORMANCE')) {
+      columns = ['Barcode', 'DayPlanNo', 'MachineCode', 'RouteCode', 'TotalProdQty', 'IsDone', 'IsTransferred', 'RegDate'];
       rows = [
         {
-          EQUIPMENT_ID: 'VVMHY130',
-          EQUIPMENT_NAME: 'Máy Cuộn HY-130',
-          MAPPING_STATUS: 'ACTIVE',
-          DAYPLAN_ID: 'DP-2609-082',
-          LINE_CODE: 'HY-02',
-          CREATED_AT: '2026-09-25 07:30:00'
-        },
-        {
-          EQUIPMENT_ID: 'VVMHY120',
-          EQUIPMENT_NAME: 'Máy Cuộn HY-120',
-          MAPPING_STATUS: 'RELEASED',
-          DAYPLAN_ID: 'DP-2609-081',
-          LINE_CODE: 'HY-01',
-          CREATED_AT: '2026-09-24 16:00:00'
+          Barcode: 'VV26090001',
+          DayPlanNo: '2026093000244',
+          MachineCode: 'VVMHY52',
+          RouteCode: 'V-22_HY',
+          TotalProdQty: 2500,
+          IsDone: 1,
+          IsTransferred: 0,
+          RegDate: '2026-09-30 16:27:54'
         }
       ];
     }

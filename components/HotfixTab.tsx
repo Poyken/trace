@@ -37,18 +37,21 @@ export default function HotfixTab() {
 -- ======================================================================
 BEGIN TRAN;
 
--- 1. Cap nhat bang thong tin tien do san xuat MES WinForm
-UPDATE SmartFactoryV2.dbo.STB_ProdRouteHist
-SET MachineCode = '${targetMachine}',
-    ChangeUserID = 'vanduc',
-    ChangeDate = GETDATE()
-WHERE LotID = '${targetLot}'
-  AND RouteOrder = (SELECT MAX(RouteOrder) FROM SmartFactoryV2.dbo.STB_ProdRouteHist WHERE LotID = '${targetLot}');
+-- 1. Cap nhat bang thong tin tien do san xuat MES WinForm (join qua STB_SetInfo)
+UPDATE H
+SET H.MachineCode = '${targetMachine}',
+    H.ChangeDateTime = GETDATE(),
+    H.ChangeUserID = 'vanduc'
+FROM SmartFactoryV2.dbo.STB_ProdRouteHist H
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${targetLot}';
 
 -- 2. Dong bo dong thoi sang bang pipeline dong bo Kiosk POP
-UPDATE VINATECH_POP.dbo.MongoToMesPerformance
-SET MachineCode = '${targetMachine}'
-WHERE LotID = '${targetLot}';
+UPDATE M
+SET M.MachineCode = '${targetMachine}',
+    M.InsertDateTime = GETDATE()
+FROM SmartFactoryV2.dbo.MongoToMesPerformance M
+WHERE M.Barcode = '${targetLot}';
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
@@ -61,12 +64,14 @@ ROLLBACK TRAN;
 -- ======================================================================
 BEGIN TRAN;
 
-UPDATE SmartFactoryV2.dbo.STB_ProdRouteHist
-SET OutTime = CONVERT(DATETIME, '${targetDate} 10:00:00', 120),
-    ChangeUserID = 'vanduc',
-    ChangeDate = GETDATE()
-WHERE LotID = '${targetLot}'
-  AND RouteOrder = (SELECT MAX(RouteOrder) FROM SmartFactoryV2.dbo.STB_ProdRouteHist WHERE LotID = '${targetLot}');
+UPDATE H
+SET H.ProdDateTime = CONVERT(DATETIME, '${targetDate} 10:00:00', 120),
+    H.JobDate = '${targetDate}',
+    H.ChangeDateTime = GETDATE(),
+    H.ChangeUserID = 'vanduc'
+FROM SmartFactoryV2.dbo.STB_ProdRouteHist H
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${targetLot}';
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
@@ -97,14 +102,16 @@ ROLLBACK TRAN;
 -- ======================================================================
 BEGIN TRAN;
 
-DECLARE @MaxOrder INT;
-SELECT @MaxOrder = MAX(RouteOrder) FROM SmartFactoryV2.dbo.STB_ProdRouteHist WHERE LotID = '${targetLot}';
+DELETE W
+FROM SmartFactoryV2.dbo.STB_ProdRouteWorkerHist W
+INNER JOIN SmartFactoryV2.dbo.STB_ProdRouteHist H ON W.ProdRouteHistNo = H.ProdRouteHistNo
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${targetLot}';
 
-DELETE FROM SmartFactoryV2.dbo.STB_ProdRouteWorkerHist
-WHERE LotID = '${targetLot}' AND RouteOrder = @MaxOrder;
-
-DELETE FROM SmartFactoryV2.dbo.STB_ProdRouteHist
-WHERE LotID = '${targetLot}' AND RouteOrder = @MaxOrder;
+DELETE H
+FROM SmartFactoryV2.dbo.STB_ProdRouteHist H
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${targetLot}';
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
@@ -117,11 +124,16 @@ ROLLBACK TRAN;
 -- ======================================================================
 BEGIN TRAN;
 
-DELETE FROM SmartFactoryV2.dbo.STB_ProdRouteHist
-WHERE LotID = '${targetLot}'
-  AND OutTime IS NULL
-  AND InTime IS NULL
-  AND RouteOrder = (SELECT MAX(RouteOrder) FROM SmartFactoryV2.dbo.STB_ProdRouteHist WHERE LotID = '${targetLot}');
+DELETE W
+FROM SmartFactoryV2.dbo.STB_ProdRouteWorkerHist W
+INNER JOIN SmartFactoryV2.dbo.STB_ProdRouteHist H ON W.ProdRouteHistNo = H.ProdRouteHistNo
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${targetLot}' AND H.CompleteRoute IS NULL;
+
+DELETE H
+FROM SmartFactoryV2.dbo.STB_ProdRouteHist H
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${targetLot}' AND H.CompleteRoute IS NULL;
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
@@ -145,13 +157,18 @@ ROLLBACK TRAN;
       case 'defect-null':
         return `-- ======================================================================
 -- HOTFIX: CHUAN HOA REPAIR_QTY = 0 (KHAC PHUC MAT COT NG TREN B782)
+-- Bang muc tieu: SmartFactoryV2.dbo.STB_DefectRepairInfo
 -- Tac gia: Nguyen Van Duc (vanduc - EA Team)
 -- ======================================================================
 BEGIN TRAN;
 
-UPDATE SmartFactoryV2.dbo.STB_ProdRouteHist
-SET RepairQty = 0, ChangeUserID = 'vanduc', ChangeDate = GETDATE()
-WHERE LotID = '${targetLot}' AND RepairQty IS NULL;
+UPDATE D
+SET D.RepairQty = 0, 
+    D.ChangeDateTime = GETDATE(), 
+    D.ChangeUserID = 'vanduc'
+FROM SmartFactoryV2.dbo.STB_DefectRepairInfo D
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON D.ControlNo = S.ControlNo
+WHERE S.Barcode = '${targetLot}' AND D.RepairQty IS NULL;
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;

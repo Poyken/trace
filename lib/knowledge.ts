@@ -14,8 +14,14 @@ export const COMMON_ERROR_PATTERNS = [
     workaround: 'Báo OP dừng bấm chốt lại trên Kiosk; thông báo IT xóa dòng thừa tự sinh.',
     hotfixTemplate: (lot: string) => `-- Hotfix xoa dong thua STB_ProdRouteHist (Rule 20.2)
 BEGIN TRAN
-  DELETE FROM STB_ProdRouteWorkerHist WHERE LotID = '${lot}' AND RouteOrder = (SELECT MAX(RouteOrder) FROM STB_ProdRouteHist WHERE LotID = '${lot}' AND CompleteRoute = 1);
-  DELETE FROM STB_ProdRouteHist WHERE LotID = '${lot}' AND CompleteRoute = 1 AND InQty = 0;
+  DELETE W FROM SmartFactoryV2.dbo.STB_ProdRouteWorkerHist W
+  INNER JOIN SmartFactoryV2.dbo.STB_ProdRouteHist H ON W.ProdRouteHistNo = H.ProdRouteHistNo
+  INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S ON H.ControlNo = S.ControlNo
+  WHERE S.Barcode = '${lot}' AND H.CompleteRoute IS NULL;
+
+  DELETE H FROM SmartFactoryV2.dbo.STB_ProdRouteHist H
+  INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S ON H.ControlNo = S.ControlNo
+  WHERE S.Barcode = '${lot}' AND H.CompleteRoute IS NULL;
 -- ROLLBACK TRAN -- Kiem tra truoc khi COMMIT
 -- COMMIT TRAN`
   },
@@ -23,11 +29,14 @@ BEGIN TRAN
     pattern: /active|kẹt máy|treo máy/i,
     rootCause: 'Thiết bị kẹt trạng thái ACTIVE trên Kiosk POP do công nhân tắt trình duyệt đột ngột hoặc đổi ca không bấm Kết Thúc.',
     workaround: 'Dùng lệnh Mở Khóa Nhanh trên Portal hoặc yêu cầu OP bấm "Đăng xuất thiết bị" trên màn hình Kiosk.',
-    hotfixTemplate: (machine: string) => `-- Giai phong thiet bi bi ket ACTIVE tren Kiosk POP
+    hotfixTemplate: (machine: string) => `-- Giai phong thiet bi bi ket ACTIVE tren Kiosk POP (Rule 20.5)
 BEGIN TRAN
-  UPDATE VINATECH_POP.dbo.STB_MachineRunningStatus
-  SET StatusCode = 'IDLE', EndTime = GETDATE(), ChangeUserID = 'vanduc'
-  WHERE MachineCode = '${machine}' AND StatusCode = 'ACTIVE';
+  UPDATE VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING
+  SET MAPPING_STATUS = 'RELEASED', RELEASED_AT = GETDATE(),
+      RELEASE_REASON = N'IT unlock machine by Web Portal (vanduc)',
+      NO_EMP_MODIFYER = 'vanduc', CD_COMPANY_MODIFYER = 'VINA'
+  WHERE (EQUIPMENT_NAME = '${machine}' OR EQUIPMENT_ID = '${machine}')
+    AND MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED');
 -- ROLLBACK TRAN
 -- COMMIT TRAN`
   },

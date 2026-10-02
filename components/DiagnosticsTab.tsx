@@ -257,7 +257,7 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
                         hostName: 'HY-MES-AP01',
                         programName: 'NAIS MES WinForm (B530)',
                         loginName: 'sa_sfv2',
-                        sqlText: "UPDATE STB_ProdRouteHist SET OutTime = GETDATE() WHERE LotID = 'VVQR232R710618'",
+                        sqlText: "UPDATE H SET H.ProdDateTime = GETDATE() FROM SmartFactoryV2.dbo.STB_ProdRouteHist H INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S ON H.ControlNo = S.ControlNo WHERE S.Barcode = 'VVQR232R710618'",
                         status: 'WAITING'
                       },
                       {
@@ -269,7 +269,7 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
                         hostName: 'KIOSK-WIND-03',
                         programName: 'Chrome / Kiosk POP Web',
                         loginName: 'sa_pop',
-                        sqlText: "BEGIN TRAN; UPDATE VINA_EQUIPMENT_MAPPING SET MAPPING_STATUS='ACTIVE' WHERE EQUIPMENT_ID='VVMHY130'...",
+                        sqlText: "BEGIN TRAN; UPDATE VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING SET MAPPING_STATUS='ACTIVE' WHERE EQUIPMENT_ID='VVMHY130'...",
                         status: 'BLOCKING'
                       }
                     ],

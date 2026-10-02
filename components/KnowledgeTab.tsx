@@ -373,12 +373,12 @@ export default function KnowledgeTab() {
                 {
                   label: 'Thiết Bị Kẹt Khóa ACTIVE',
                   db: 'VINATECH_POP',
-                  sql: "SELECT TOP 50 EQUIPMENT_ID, EQUIPMENT_NAME, MAPPING_STATUS, DAYPLAN_ID, LINE_CODE, CREATED_AT\nFROM VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING WITH (NOLOCK)\nWHERE MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED');"
+                  sql: "SELECT TOP 50 MAPPING_ID, DAY_PLAN_NO, LINE_CODE, ROUTE_CODE, EQUIPMENT_ID, EQUIPMENT_NAME, MAPPING_STATUS, MAPPED_AT\nFROM VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING WITH (NOLOCK)\nWHERE MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED')\nORDER BY MAPPED_AT DESC;"
                 },
                 {
                   label: 'Kẹt Pipeline MongoToMes',
-                  db: 'VINATECH_POP',
-                  sql: "SELECT TOP 50 LotID, MachineCode, IsDone, IsTransferred, RegDate\nFROM VINATECH_POP.dbo.MongoToMesPerformance WITH (NOLOCK)\nWHERE IsDone = 1 AND IsTransferred = 0\nORDER BY RegDate DESC;"
+                  db: 'SmartFactoryV2',
+                  sql: "SELECT TOP 50 Barcode, DayPlanNo, MachineCode, RouteCode, TotalProdQty, IsDone, IsTransferred, RegDate\nFROM SmartFactoryV2.dbo.MongoToMesPerformance WITH (NOLOCK)\nWHERE IsDone = 1 AND IsTransferred = 0\nORDER BY RegDate DESC;"
                 },
                 {
                   label: 'Tồn Kho Xưởng ROUTE_VN_WH',

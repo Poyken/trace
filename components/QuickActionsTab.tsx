@@ -107,18 +107,21 @@ export default function QuickActionsTab() {
 -- ======================================================================
 BEGIN TRAN;
 
--- 1. Cap nhat bang thong tin tien do san xuat MES WinForm
-UPDATE SmartFactoryV2.dbo.STB_ProdRouteHist
-SET MachineCode = '${machine}',
-    ChangeUserID = 'vanduc',
-    ChangeDate = GETDATE()
-WHERE LotID = '${lot}'
-  AND RouteOrder = (SELECT MAX(RouteOrder) FROM SmartFactoryV2.dbo.STB_ProdRouteHist WHERE LotID = '${lot}');
+-- 1. Cap nhat bang thong tin tien do san xuat MES WinForm (join qua STB_SetInfo)
+UPDATE H
+SET H.MachineCode = '${machine}',
+    H.ChangeDateTime = GETDATE(),
+    H.ChangeUserID = 'vanduc'
+FROM SmartFactoryV2.dbo.STB_ProdRouteHist H
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${lot}';
 
 -- 2. Dong bo dong thoi sang bang pipeline dong bo Kiosk POP
-UPDATE VINATECH_POP.dbo.MongoToMesPerformance
-SET MachineCode = '${machine}'
-WHERE LotID = '${lot}';
+UPDATE M
+SET M.MachineCode = '${machine}',
+    M.InsertDateTime = GETDATE()
+FROM SmartFactoryV2.dbo.MongoToMesPerformance M
+WHERE M.Barcode = '${lot}';
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
@@ -157,7 +160,7 @@ ROLLBACK TRAN;
       title: 'Chuyển Ngày Chốt B782 (10h00 AM)',
       tag: 'MES WINFORM',
       tagColor: 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800',
-      description: 'Lùi/chuyển OutTime về 10:00:00 AM của ngày chỉ định cho công nhân chốt ca muộn.',
+      description: 'Chuyển ProdDateTime & JobDate về 10:00:00 AM của ngày chỉ định cho công nhân chốt ca muộn.',
       icon: Calendar,
       targetDb: 'SmartFactoryV2',
       defaultInputs: { lot: selectedLot, date: selectedDate },
@@ -167,12 +170,14 @@ ROLLBACK TRAN;
 -- ======================================================================
 BEGIN TRAN;
 
-UPDATE SmartFactoryV2.dbo.STB_ProdRouteHist
-SET OutTime = CONVERT(DATETIME, '${date} 10:00:00', 120),
-    ChangeUserID = 'vanduc',
-    ChangeDate = GETDATE()
-WHERE LotID = '${lot}'
-  AND RouteOrder = (SELECT MAX(RouteOrder) FROM SmartFactoryV2.dbo.STB_ProdRouteHist WHERE LotID = '${lot}');
+UPDATE H
+SET H.ProdDateTime = CONVERT(DATETIME, '${date} 10:00:00', 120),
+    H.JobDate = '${date}',
+    H.ChangeDateTime = GETDATE(),
+    H.ChangeUserID = 'vanduc'
+FROM SmartFactoryV2.dbo.STB_ProdRouteHist H
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${lot}';
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
@@ -193,11 +198,16 @@ ROLLBACK TRAN;
 -- ======================================================================
 BEGIN TRAN;
 
-DELETE FROM SmartFactoryV2.dbo.STB_ProdRouteHist
-WHERE LotID = '${lot}'
-  AND OutTime IS NULL
-  AND InTime IS NULL
-  AND RouteOrder = (SELECT MAX(RouteOrder) FROM SmartFactoryV2.dbo.STB_ProdRouteHist WHERE LotID = '${lot}');
+DELETE W
+FROM SmartFactoryV2.dbo.STB_ProdRouteWorkerHist W
+INNER JOIN SmartFactoryV2.dbo.STB_ProdRouteHist H ON W.ProdRouteHistNo = H.ProdRouteHistNo
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${lot}' AND H.CompleteRoute IS NULL;
+
+DELETE H
+FROM SmartFactoryV2.dbo.STB_ProdRouteHist H
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${lot}' AND H.CompleteRoute IS NULL;
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
@@ -218,14 +228,16 @@ ROLLBACK TRAN;
 -- ======================================================================
 BEGIN TRAN;
 
-DECLARE @MaxOrder INT;
-SELECT @MaxOrder = MAX(RouteOrder) FROM SmartFactoryV2.dbo.STB_ProdRouteHist WHERE LotID = '${lot}';
+DELETE W
+FROM SmartFactoryV2.dbo.STB_ProdRouteWorkerHist W
+INNER JOIN SmartFactoryV2.dbo.STB_ProdRouteHist H ON W.ProdRouteHistNo = H.ProdRouteHistNo
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${lot}';
 
-DELETE FROM SmartFactoryV2.dbo.STB_ProdRouteWorkerHist
-WHERE LotID = '${lot}' AND RouteOrder = @MaxOrder;
-
-DELETE FROM SmartFactoryV2.dbo.STB_ProdRouteHist
-WHERE LotID = '${lot}' AND RouteOrder = @MaxOrder;
+DELETE H
+FROM SmartFactoryV2.dbo.STB_ProdRouteHist H
+INNER JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo
+WHERE S.Barcode = '${lot}';
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;

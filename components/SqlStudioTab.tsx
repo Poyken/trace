@@ -61,47 +61,47 @@ const PRESETS: QueryPreset[] = [
     profile: 'SmartFactoryV2',
     description: 'Truy vấn các lượt chốt sản lượng mới nhất trên dây chuyền',
     sql: `SELECT TOP 50 
-    ProdRouteHistNo, PONo, DayPlanNo, MaterialCode, 
-    LineCode, RouteCode, WorkerCode, MachineCode, 
-    ProdQty, ProdDateTime, CreateDateTime 
-FROM STB_ProdRouteHist WITH(NOLOCK) 
-ORDER BY CreateDateTime DESC;`
+    H.ProdRouteHistNo, H.ControlNo, S.Barcode AS LotID, S.DayPlanNo, 
+    H.RouteCode, H.WorkCenterCode, H.ProdQty, H.JobDate, H.ProdDateTime, H.CompleteRoute 
+FROM SmartFactoryV2.dbo.STB_ProdRouteHist H WITH(NOLOCK) 
+LEFT JOIN SmartFactoryV2.dbo.STB_SetInfo S WITH(NOLOCK) ON H.ControlNo = S.ControlNo 
+ORDER BY H.ProdDateTime DESC;`
   },
   {
     id: 'pop_locked_machines',
-    name: '39 Máy Kiosk Kẹt ACTIVE',
+    name: 'Thiết Bị Kiosk Kẹt Khóa (ACTIVE)',
     profile: 'VINATECH_POP',
-    description: 'Danh sách thiết bị Kiosk xưởng đang bị giữ khóa ACTIVE',
+    description: 'Danh sách thiết bị Kiosk xưởng đang bị giữ khóa ACTIVE / AUTO_MAPPED',
     sql: `SELECT 
-    EQUIPMENT_ID, EQUIPMENT_NAME, MAPPING_STATUS, 
-    DAYPLAN_ID, LINE_CODE, CREATED_AT, UPDATED_AT 
-FROM VINA_EQUIPMENT_MAPPING WITH(NOLOCK) 
-WHERE MAPPING_STATUS = 'ACTIVE' 
-ORDER BY CREATED_AT DESC;`
+    MAPPING_ID, DAY_PLAN_NO, LINE_CODE, ROUTE_CODE, EQUIPMENT_ID, EQUIPMENT_NAME, 
+    MAPPING_STATUS, MAPPED_BY, MAPPED_AT, RELEASED_AT, RELEASE_REASON 
+FROM VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING WITH(NOLOCK) 
+WHERE MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED') 
+ORDER BY MAPPED_AT DESC;`
   },
   {
     id: 'pop_sync_stuck',
-    name: '37 Lot Kẹt Sync POP -> MES',
-    profile: 'VINATECH_POP',
+    name: 'Lot Kẹt Sync POP -> MES',
+    profile: 'SmartFactoryV2',
     description: 'Các mẻ sản xuất đã xong trên Kiosk nhưng chưa sang MES lõi',
     sql: `SELECT TOP 50 
-    LotNo, DayPlanNo, MachineCode, RouteCode, 
-    ProdQty, IsDone, IsTransferred, CreatedAt 
-FROM MongoToMesPerformance WITH(NOLOCK) 
+    Barcode, DayPlanNo, MachineCode, RouteCode, 
+    TotalProdQty, TotalDefectQty, IsDone, IsTransferred, InsertDateTime, ModifyDateTime 
+FROM SmartFactoryV2.dbo.MongoToMesPerformance WITH(NOLOCK) 
 WHERE IsDone = 1 AND IsTransferred = 0 
-ORDER BY CreatedAt DESC;`
+ORDER BY InsertDateTime DESC;`
   },
   {
     id: 'hold_lots',
     name: 'Danh Sách Lot Bị HOLD',
     profile: 'SmartFactoryV2',
-    description: 'Quét các Lot đang bị chặn không thể đi tiếp công đoạn',
+    description: 'Quét các Lot NVL/BTP đang bị khóa HOLD chất lượng hoặc quá hạn',
     sql: `SELECT TOP 50 
-    LotID, ProductCode, Line, CurRouteOrder, 
-    HoldState, HoldReason, HoldUserID, HoldDateTime 
-FROM STB_LotMaster WITH(NOLOCK) 
-WHERE HoldState = 1 
-ORDER BY HoldDateTime DESC;`
+    MaterialLotNo, LotID, MaterialCode, MaterialWarehouseCode, 
+    CurrentQty, InitialQty, Holddate, HoldError, HoldPeriod 
+FROM SmartFactoryV2.dbo.STB_MaterialLotInfo WITH(NOLOCK) 
+WHERE Holddate IS NOT NULL OR HoldError IS NOT NULL 
+ORDER BY Holddate DESC;`
   },
   {
     id: 'blocking_locks',
@@ -149,9 +149,10 @@ ORDER BY LAST_ALTERED DESC;`
     profile: 'VINATECH_GROUP',
     description: 'Tra cứu chứng từ phê duyệt và tờ trình PO Bizbox',
     sql: `SELECT TOP 30 
-    doc_id, doc_title, user_name, create_date, doc_status 
-FROM teag_appdoc WITH(NOLOCK) 
-ORDER BY create_date DESC;`
+    DOCUMENT_SAVE_CODE, DOCUMENT_TYPE_ID, NO_EMP_WRITER, 
+    DOCUMENT_SAVE_SUBJECT, DOCUMENT_SAVE_STATE, DOCUMENT_SAVE_REG_DATE 
+FROM VINATECH_GROUP.dbo.VINA_DOCUMENT_SAVE WITH(NOLOCK) 
+ORDER BY DOCUMENT_SAVE_REG_DATE DESC;`
   }
 ];
 
