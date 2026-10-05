@@ -21,13 +21,15 @@ import {
   Terminal,
   FileCode2,
   ChevronRight,
-  ShieldAlert
+  ShieldAlert,
+  Copy
 } from 'lucide-react';
 import { TraceResult, UserInspectionResult, PackInspectionResult, LineageResult, DbLocksResult } from '@/lib/types';
 
 interface DiagnosticsTabProps {
   initialType?: string;
   initialTarget?: string;
+  onNavigateTab?: (tab: string, target?: string) => void;
 }
 
 function EmptyStateCard({
@@ -73,7 +75,7 @@ function EmptyStateCard({
   );
 }
 
-export default function DiagnosticsTab({ initialType = 'trace', initialTarget = '' }: DiagnosticsTabProps) {
+export default function DiagnosticsTab({ initialType = 'trace', initialTarget = '', onNavigateTab }: DiagnosticsTabProps) {
   const [subTab, setSubTab] = useState<'trace' | 'lineage' | 'locks' | 'bom' | 'pack' | 'user'>(
     (initialType as any) || 'trace'
   );
@@ -348,69 +350,175 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
                 </div>
                 <div className="flex items-center gap-3 mt-1.5">
                   <h3 className="text-2xl font-black font-mono tracking-tight text-slate-900 dark:text-white">{traceData.target}</h3>
-                  <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400 text-xs font-bold tracking-wide">
-                    {traceData.status}
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide border ${
+                    traceData.missingStandardRoutes && traceData.missingStandardRoutes.length > 0
+                      ? 'bg-rose-100 dark:bg-rose-950/80 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300 animate-pulse'
+                      : 'bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400'
+                  }`}>
+                    {traceData.missingStandardRoutes && traceData.missingStandardRoutes.length > 0
+                      ? 'LỖI ĐỊNH TUYẾN PO'
+                      : traceData.status}
                   </span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs font-mono">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
                 <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800/80">
                   <span className="text-slate-500 font-sans block text-[11px]">Model Sản Phẩm</span>
-                  <span className="font-bold text-slate-900 dark:text-slate-100">{traceData.modelCode}</span>
+                  <span className="font-bold text-slate-900 dark:text-slate-100 truncate block">{traceData.modelCode}</span>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800/80">
+                  <span className="text-slate-500 font-sans block text-[11px]">Lệnh Sản Xuất (PO)</span>
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400 truncate block">{traceData.poCode || 'Chưa liên kết'}</span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800/80">
                   <span className="text-slate-500 font-sans block text-[11px]">Dây Chuyền (Line)</span>
-                  <span className="font-bold text-cyan-600 dark:text-cyan-400">{traceData.line}</span>
+                  <span className="font-bold text-cyan-600 dark:text-cyan-400 truncate block">{traceData.line}</span>
                 </div>
-                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800/80 col-span-2 sm:col-span-1">
-                  <span className="text-slate-500 font-sans block text-[11px]">Đóng Thùng / Packing</span>
-                  <span className="font-bold text-indigo-600 dark:text-indigo-400">{traceData.packingInfo?.packingId}</span>
+                <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800/80">
+                  <span className="text-slate-500 font-sans block text-[11px]">Đóng Thùng / Pack</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300 truncate block">{traceData.packingInfo?.packingId || 'Chưa đóng gói'}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Stepper Flow */}
-          <div className="glass-panel rounded-2xl p-6 space-y-4">
-            <div className="flex justify-between items-center">
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                Sơ Đồ Tiến Trình Chuyển Tuyến Công Nghệ (Visual Process Stepper)
-              </h4>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">Click từng nút để xem thông số</span>
-            </div>
-
-            <div className="relative pt-2 pb-4 overflow-x-auto">
-              <div className="flex items-center min-w-[700px] justify-between relative">
-                <div className="absolute top-5 left-6 right-6 h-1 bg-slate-200 dark:bg-slate-800 z-0">
-                  <div className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 w-full rounded" />
+          {/* KHUNG CẢNH BÁO ĐỎ NỔI BẬT: PHÁT HIỆN THIẾU CÔNG ĐOẠN CHUẨN (PO ROUTING MISMATCH) */}
+          {traceData.missingStandardRoutes && traceData.missingStandardRoutes.length > 0 && (
+            <div className="p-6 rounded-2xl bg-gradient-to-r from-rose-500/15 via-rose-500/10 to-amber-500/10 border-2 border-rose-500/80 dark:border-rose-500 shadow-xl shadow-rose-500/10 space-y-4 animate-fade-in relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-rose-600/30 animate-pulse">
+                    <ShieldAlert className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-black text-rose-700 dark:text-rose-400 flex items-center gap-2">
+                      <span>CẢNH BÁO NGUY CƠ NHẢY CÓC CÔNG ĐOẠN (PO ROUTING MISMATCH)</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-600 text-white font-mono font-bold">
+                        CRITICAL
+                      </span>
+                    </h4>
+                    <p className="text-xs text-rose-900 dark:text-rose-200 mt-1 max-w-2xl leading-relaxed">
+                      Lệnh sản xuất <b>PO: {traceData.poCode}</b> có cấu hình định tuyến trong <code className="bg-rose-100 dark:bg-rose-950 px-1 py-0.5 rounded font-mono font-bold">STB_ProductionOrderRouting</code> bị thiếu <b>{traceData.missingStandardRoutes.length} công đoạn chuẩn</b> so với Model Master (<code className="font-mono">{traceData.basicRoutingCode || 'MainRoutingRubAging'}</code>).
+                    </p>
+                  </div>
                 </div>
 
-                {traceData.routeHistory.map((route, idx) => {
+                {onNavigateTab && (
+                  <button
+                    onClick={() => onNavigateTab('hotfix')}
+                    className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-600/30 transition flex items-center gap-2 shrink-0"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Tạo Hotfix Bổ Sung Aging PO</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Danh sách các công đoạn bị thiếu */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                {traceData.missingStandardRoutes.map((mRoute) => (
+                  <div
+                    key={mRoute.routeCode}
+                    className="p-3.5 rounded-xl bg-white/80 dark:bg-slate-900/90 border border-rose-300 dark:border-rose-800/80 shadow-sm flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                        <span className="w-5 h-5 rounded-md bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 flex items-center justify-center font-mono text-[10px]">
+                          {mRoute.routeIndex}
+                        </span>
+                        <span>{mRoute.routeName}</span>
+                        <code className="text-rose-600 dark:text-rose-400 font-mono text-[11px] font-bold">({mRoute.routeCode})</code>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-sans">
+                        Vị trí chuẩn: Bước thứ {mRoute.routeIndex} trong quy trình {traceData.basicRoutingName || traceData.basicRoutingCode}.
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 text-[10px] font-bold font-mono border border-rose-300 dark:border-rose-800">
+                      BỊ BỎ QUA
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-3 rounded-xl bg-rose-100/60 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-[11px] text-rose-800 dark:text-rose-300 leading-relaxed font-sans">
+                💡 <b>Hậu quả tại xưởng:</b> Kiosk POP đọc định tuyến trực tiếp từ Lệnh SX PO. Khi công nhân chốt xong công đoạn bọc vỏ (<code className="font-mono font-bold">V-25_HY</code>), Kiosk sẽ <b>nhảy cóc thẳng sang Ngoại quan (<code className="font-mono font-bold">V-27_HY</code>)</b>, bỏ qua hoàn toàn công đoạn Lão hóa nhiệt (<code className="font-mono font-bold">V-26_HY Aging</code>), dẫn đến nguy cơ xuất xưởng hàng chưa test độ ổn định điện áp!
+              </div>
+            </div>
+          )}
+
+          {/* SƠ ĐỒ TIẾN TRÌNH CÔNG NGHỆ (VISUAL PROCESS STEPPER) */}
+          <div className="glass-panel rounded-2xl p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                  Sơ Đồ Tiến Trình Chuyển Tuyến Công Nghệ (Visual Process Stepper)
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Đối chiếu giữa Lịch sử thực tế (ProdRouteHist) và Định tuyến Lệnh SX (STB_ProductionOrderRouting)
+                </p>
+              </div>
+              <div className="flex items-center gap-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Đã chốt MES</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span> Đang chờ POP</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700"></span> Chưa tới</span>
+              </div>
+            </div>
+
+            {/* Stepper Pipeline */}
+            <div className="relative pt-3 pb-4 overflow-x-auto">
+              <div className="flex items-center min-w-[760px] justify-between relative px-4">
+                <div className="absolute top-8 left-8 right-8 h-1 bg-slate-200 dark:bg-slate-800 z-0">
+                  <div className="h-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-amber-500 w-3/4 rounded" />
+                </div>
+
+                {/* Render các bước từ poRouting hoặc routeHistory */}
+                {(traceData.poRouting && traceData.poRouting.length > 0 ? traceData.poRouting : traceData.routeHistory.map((r, i) => ({
+                  routeIndex: i + 1,
+                  routeCode: r.routeName.split(' ')[0],
+                  routeName: r.routeName,
+                  isInputRoute: i === 0,
+                  isOutputRoute: i === traceData.routeHistory.length - 1
+                }))).map((route, idx) => {
+                  const completedHist = traceData.routeHistory.find(h => h.routeName.includes(route.routeCode) || (route.routeCode && h.machineCode && h.routeName.includes(route.routeCode)));
+                  const isCompleted = !!completedHist;
+                  const isCurrent = !isCompleted && idx === traceData.routeHistory.length;
                   const isSelected = selectedRouteIdx === idx;
-                  const isLast = idx === traceData.routeHistory.length - 1;
+
                   return (
                     <div
-                      key={route.routeOrder}
+                      key={route.routeCode + '-' + idx}
                       onClick={() => setSelectedRouteIdx(idx)}
                       className="flex flex-col items-center relative z-10 cursor-pointer group"
                     >
                       <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-mono font-bold text-xs transition-all shadow-md ${
+                        className={`w-11 h-11 rounded-full flex items-center justify-center font-mono font-bold text-xs transition-all shadow-md ${
                           isSelected
-                            ? 'bg-cyan-500 text-slate-950 ring-4 ring-cyan-500/30 scale-110'
-                            : isLast
-                            ? 'bg-indigo-600 text-white ring-2 ring-indigo-400'
-                            : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-cyan-500'
+                            ? 'bg-cyan-500 text-slate-950 ring-4 ring-cyan-500/40 scale-110'
+                            : isCompleted
+                            ? 'bg-emerald-500 text-white ring-2 ring-emerald-400 hover:scale-105'
+                            : isCurrent
+                            ? 'bg-amber-500 text-slate-950 ring-4 ring-amber-400/40 animate-pulse'
+                            : 'bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-cyan-500'
                         }`}
                       >
-                        {route.routeOrder}
+                        {isCompleted ? <Check className="w-5 h-5 stroke-[2.5]" /> : route.routeIndex}
                       </div>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-2 text-center max-w-[110px] truncate">
+
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-2 text-center max-w-[110px] truncate group-hover:text-cyan-600 transition">
                         {route.routeName.split(' ')[0]}
                       </span>
-                      <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400">
-                        {route.machineCode}
+                      <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                        {route.routeCode}
+                      </span>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full mt-1 ${
+                        isCompleted
+                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400'
+                          : isCurrent
+                          ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                      }`}>
+                        {isCompleted ? 'ĐÃ CHỐT' : isCurrent ? 'ĐANG CHỜ' : 'CHƯA TỚI'}
                       </span>
                     </div>
                   );
@@ -418,8 +526,8 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
               </div>
             </div>
 
-            {/* Selected Route Details */}
-            {traceData.routeHistory[selectedRouteIdx] && (
+            {/* Selected Route Info Box */}
+            {traceData.routeHistory[selectedRouteIdx] ? (
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
                 <div>
                   <span className="text-slate-500 font-sans">Công đoạn đã chọn:</span>
@@ -446,8 +554,197 @@ export default function DiagnosticsTab({ initialType = 'trace', initialTarget = 
                   </div>
                 </div>
               </div>
-            )}
+            ) : traceData.poRouting && traceData.poRouting[selectedRouteIdx] ? (
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
+                <div>
+                  <span className="text-slate-500 font-sans">Công đoạn PO:</span>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                    {traceData.poRouting[selectedRouteIdx].routeName}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-slate-500 font-sans">Mã RouteCode:</span>
+                  <div className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
+                    {traceData.poRouting[selectedRouteIdx].routeCode}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-slate-500 font-sans">Người sửa PO:</span>
+                  <div className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
+                    {traceData.poRouting[selectedRouteIdx].changeUser || 'Hệ thống'}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-slate-500 font-sans">Trạng thái:</span>
+                  <div className="text-sm font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+                    Chưa chốt trên MES WinForm
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
+
+          {/* BẢNG 1: CẤU HÌNH ĐỊNH TUYẾN LỆNH SẢN XUẤT (PO ROUTING) */}
+          {traceData.poRouting && traceData.poRouting.length > 0 && (
+            <div className="bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/80 dark:bg-slate-950/40">
+                <div className="flex items-center gap-2">
+                  <GitFork className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                    Cấu Hình Định Tuyến Lệnh Sản Xuất (<code className="font-mono text-indigo-600 dark:text-indigo-400">STB_ProductionOrderRouting</code>)
+                  </h4>
+                </div>
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                  PO: <b className="text-slate-800 dark:text-slate-200">{traceData.poCode}</b> ({traceData.poRouting.length} công đoạn)
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead className="bg-slate-100/80 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
+                    <tr>
+                      <th className="py-2.5 px-4">Thứ Tự</th>
+                      <th className="py-2.5 px-4">Mã Công Đoạn</th>
+                      <th className="py-2.5 px-4">Tên Công Đoạn</th>
+                      <th className="py-2.5 px-4">Điểm Vào/Ra</th>
+                      <th className="py-2.5 px-4">Tiến Độ Thực Tế</th>
+                      <th className="py-2.5 px-4">Người Sửa Cuối</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                    {traceData.poRouting.map((pRoute) => {
+                      const completedHist = traceData.routeHistory.find(h => h.routeName.includes(pRoute.routeCode));
+                      return (
+                        <tr key={pRoute.routeIndex} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                          <td className="py-2.5 px-4 font-bold text-slate-900 dark:text-white">
+                            #{pRoute.routeIndex}
+                          </td>
+                          <td className="py-2.5 px-4 text-cyan-600 dark:text-cyan-400 font-bold">
+                            {pRoute.routeCode}
+                          </td>
+                          <td className="py-2.5 px-4 font-sans font-medium text-slate-900 dark:text-slate-200">
+                            {pRoute.routeName}
+                          </td>
+                          <td className="py-2.5 px-4">
+                            {pRoute.isInputRoute ? (
+                              <span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                                Input
+                              </span>
+                            ) : pRoute.isOutputRoute ? (
+                              <span className="px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 text-[10px] font-bold">
+                                Output
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 text-[10px]">-</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-4">
+                            {completedHist ? (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold flex items-center gap-1 w-fit">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                Đã chốt MES ({completedHist.goodQty} EA)
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 text-[10px] font-bold flex items-center gap-1 w-fit">
+                                <Clock className="w-3 h-3 text-amber-600" />
+                                Đang chờ chốt
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-4 text-slate-500 dark:text-slate-400">
+                            {pRoute.changeUser || 'Hệ thống'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* BẢNG 2: LỊCH SỬ SẢN XUẤT THỰC TẾ (MES WINFORM & KIOSK POP) */}
+          <div className="bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/80 dark:bg-slate-950/40">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Lịch Sử Sản Xuất Đã Chốt (<code className="font-mono text-cyan-600 dark:text-cyan-400">STB_ProdRouteHist</code>)
+                </h4>
+              </div>
+              <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                {traceData.routeHistory.length} công đoạn đã qua
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs font-mono">
+                <thead className="bg-slate-100/80 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
+                  <tr>
+                    <th className="py-2.5 px-4">Bước</th>
+                    <th className="py-2.5 px-4">Tên Công Đoạn</th>
+                    <th className="py-2.5 px-4">Thiết Bị / Kiosk</th>
+                    <th className="py-2.5 px-4">Công Nhân</th>
+                    <th className="py-2.5 px-4">Thời Gian Hoàn Tất</th>
+                    <th className="py-2.5 px-4">SL Đạt</th>
+                    <th className="py-2.5 px-4">SL Phế</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                  {traceData.routeHistory.map((item) => (
+                    <tr key={item.routeOrder} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                      <td className="py-2.5 px-4 font-bold text-slate-900 dark:text-white">
+                        #{item.routeOrder}
+                      </td>
+                      <td className="py-2.5 px-4 font-sans font-medium text-slate-900 dark:text-slate-200">
+                        {item.routeName}
+                      </td>
+                      <td className="py-2.5 px-4 text-cyan-600 dark:text-cyan-400 font-bold">
+                        {item.machineCode}
+                      </td>
+                      <td className="py-2.5 px-4 text-slate-600 dark:text-slate-300">
+                        {item.workerId}
+                      </td>
+                      <td className="py-2.5 px-4 text-slate-500 dark:text-slate-400">
+                        {item.outTime}
+                      </td>
+                      <td className="py-2.5 px-4 font-bold text-emerald-600 dark:text-emerald-400">
+                        {item.goodQty.toLocaleString()} EA
+                      </td>
+                      <td className="py-2.5 px-4 text-rose-600 dark:text-rose-400 font-bold">
+                        {item.ngQty} EA
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* RAW CLI OUTPUT (Tùy chọn xem terminal CLI chuẩn .\mes.ps1 trace) */}
+          {traceData.rawCliOutput && (
+            <div className="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-lg font-mono text-xs">
+              <div className="p-3 bg-slate-900 border-b border-slate-800 flex justify-between items-center text-slate-300">
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-4 h-4 text-emerald-400" />
+                  <span className="font-bold text-slate-200">Terminal CLI Output (.\mes.ps1 trace &apos;{traceData.target}&apos;)</span>
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(traceData.rawCliOutput || '');
+                  }}
+                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] flex items-center gap-1 transition"
+                  title="Copy toàn bộ output CLI"
+                >
+                  <Copy className="w-3 h-3" />
+                  <span>Copy Log</span>
+                </button>
+              </div>
+              <pre className="p-4 text-slate-300 overflow-x-auto text-[11px] leading-relaxed max-h-80">
+                {traceData.rawCliOutput}
+              </pre>
+            </div>
+          )}
         </div>
       ) : !loading ? (
         <EmptyStateCard

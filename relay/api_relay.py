@@ -219,22 +219,7 @@ class RelayHandler(BaseHTTPRequestHandler):
         body = self.rfile.read(content_length).decode("utf-8")
         parsed = urllib.parse.urlparse(self.path)
 
-        if parsed.path == "/api/unlock":
-            try:
-                data = json.loads(body)
-                machine = data.get("machine", "")
-                result = run_cli_command([".\\mes.ps1", "unlock", f'"{machine}"', "-Deploy"])
-                self.send_response(200)
-                self._send_cors_headers()
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps(result).encode("utf-8"))
-            except Exception as e:
-                self.send_response(400)
-                self._send_cors_headers()
-                self.end_headers()
-
-        elif parsed.path == "/api/deploy":
+        if parsed.path == "/api/deploy":
             try:
                 import time
                 data = json.loads(body)

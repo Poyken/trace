@@ -1,18 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Activity, AlertTriangle, CheckCircle2, Lock, RefreshCw, Cpu, Database, Unlock, Code, ChevronDown, ChevronUp } from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle2, Lock, RefreshCw, Cpu, Database, Code, ChevronDown, ChevronUp } from 'lucide-react';
 import { HealthStatus } from '@/lib/types';
 import { MOCK_HEALTH_DATA } from '@/lib/knowledge';
-import SqlApprovalModal from '@/components/SqlApprovalModal';
 
 export default function DashboardTab() {
   const [health, setHealth] = useState<HealthStatus>(MOCK_HEALTH_DATA);
   const [loading, setLoading] = useState(false);
-  const [unlockMessage, setUnlockMessage] = useState<string | null>(null);
   const [showSqlInspector, setShowSqlInspector] = useState(false);
-  const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
-  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
 
   const fetchHealth = async () => {
     setLoading(true);
@@ -55,12 +51,7 @@ export default function DashboardTab() {
         </button>
       </div>
 
-      {unlockMessage && (
-        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-medium rounded-xl flex items-center gap-2 animate-fade-in shadow-sm">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>{unlockMessage}</span>
-        </div>
-      )}
+
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -165,30 +156,6 @@ FROM VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING WITH(NOLOCK)
 WHERE MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED')
 ORDER BY MAPPED_AT DESC;`}
             </pre>
-            <div className="text-emerald-400 font-bold flex items-center gap-2 pt-2">
-              <span>SQL THỰC THI GIẢI PHÓNG (KHI BẤM NÚT &quot;MỞ KHÓA&quot;):</span>
-            </div>
-            <pre className="p-3 bg-slate-950 rounded-xl border border-slate-800 overflow-x-auto text-[11px] text-emerald-300">
-{`BEGIN TRANSACTION;
-BEGIN TRY
-    UPDATE VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING
-    SET MAPPING_STATUS      = 'RELEASED',
-        RELEASED_AT         = GETDATE(),
-        RELEASE_REASON      = N'IT unlock machine by Web Portal (vanduc)',
-        NO_EMP_MODIFYER     = 'vanduc',
-        CD_COMPANY_MODIFYER = 'VINA'
-    WHERE (EQUIPMENT_NAME = '{MACHINE_CODE}' OR EQUIPMENT_ID = '{MACHINE_CODE}')
-      AND MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED');
-
-    DECLARE @Rows INT = @@ROWCOUNT;
-    COMMIT TRANSACTION;
-    SELECT @Rows AS UpdatedRows;
-END TRY
-BEGIN CATCH
-    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    THROW;
-END CATCH;`}
-            </pre>
           </div>
         )}
 
@@ -240,17 +207,6 @@ END CATCH;`}
                         {mappedAt && <div><span className="text-slate-400">Khóa lúc:</span> {mappedAt}</div>}
                       </div>
                     </div>
-
-                    <button
-                      onClick={() => {
-                        setSelectedMachine(eqId);
-                        setIsApprovalModalOpen(true);
-                      }}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold rounded-lg transition shadow-md shadow-cyan-600/20 active:scale-[0.98]"
-                    >
-                      <Unlock className="w-3.5 h-3.5" />
-                      Mở khóa (Duyệt SQL)
-                    </button>
                   </div>
                 );
               })}
@@ -258,51 +214,6 @@ END CATCH;`}
           )}
         </div>
       </div>
-
-      {/* SQL Approval & Execution Modal for Machine Unlock */}
-      {selectedMachine && (
-        <SqlApprovalModal
-          isOpen={isApprovalModalOpen}
-          onClose={() => {
-            setIsApprovalModalOpen(false);
-            setSelectedMachine(null);
-          }}
-          title={`Phê Duyệt Mở Khóa Thiết Bị Kiosk: ${selectedMachine}`}
-          targetDb="VINATECH_POP"
-          targetTable="VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING"
-          sql={`BEGIN TRANSACTION;
-BEGIN TRY
-    UPDATE VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING
-    SET MAPPING_STATUS      = 'RELEASED',
-        RELEASED_AT         = GETDATE(),
-        RELEASE_REASON      = N'IT unlock machine by Web Portal (vanduc)',
-        NO_EMP_MODIFYER     = 'vanduc',
-        CD_COMPANY_MODIFYER = 'VINA'
-    WHERE (EQUIPMENT_NAME = '${selectedMachine}' OR EQUIPMENT_ID = '${selectedMachine}')
-      AND MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED');
-
-    DECLARE @Rows INT = @@ROWCOUNT;
-    COMMIT TRANSACTION;
-    SELECT @Rows AS UpdatedRows;
-END TRY
-BEGIN CATCH
-    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    THROW;
-END CATCH;`}
-          onExecuted={() => {
-            setUnlockMessage(`Đã giải phóng máy ${selectedMachine} thành công!`);
-            setHealth(prev => ({
-              ...prev,
-              activeEquipmentLocks: {
-                ...prev.activeEquipmentLocks,
-                count: Math.max(0, prev.activeEquipmentLocks.count - 1),
-                machines: prev.activeEquipmentLocks.machines.filter(m => m !== selectedMachine)
-              }
-            }));
-            setTimeout(() => setUnlockMessage(null), 4000);
-          }}
-        />
-      )}
     </div>
   );
 }

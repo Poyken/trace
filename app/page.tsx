@@ -13,13 +13,11 @@ import SettingsTab from '@/components/SettingsTab';
 import SqlStudioTab from '@/components/SqlStudioTab';
 import CommandPalette from '@/components/CommandPalette';
 import FloatingSpeedDial from '@/components/FloatingSpeedDial';
-import SqlApprovalModal from '@/components/SqlApprovalModal';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('quick_actions');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const [quickUnlockModal, setQuickUnlockModal] = useState<{ isOpen: boolean; machine: string } | null>(null);
   const [diagInitial, setDiagInitial] = useState<{ type: string; target: string }>({
     type: 'trace',
     target: ''
@@ -140,6 +138,7 @@ export default function Home() {
           <DiagnosticsTab
             initialType={diagInitial.type}
             initialTarget={diagInitial.target}
+            onNavigateTab={(tab) => setActiveTab(tab as any)}
           />
         )}
         {activeTab === 'sql_studio' && <SqlStudioTab />}
@@ -152,37 +151,7 @@ export default function Home() {
       {/* Floating Speed Dial */}
       <FloatingSpeedDial
         onNavigateTab={(tab) => setActiveTab(tab)}
-        onOpenUnlockModal={() => setQuickUnlockModal({ isOpen: true, machine: 'VVMHY130' })}
       />
-
-      {/* Quick Unlock Machine Modal */}
-      {quickUnlockModal?.isOpen && (
-        <SqlApprovalModal
-          isOpen={true}
-          onClose={() => setQuickUnlockModal(null)}
-          title={`Mở Khóa Khẩn Cấp Thiết Bị: ${quickUnlockModal.machine}`}
-          targetDb="VINATECH_POP"
-          sql={`-- ======================================================================
--- HOTFIX: GIAI PHONG THIET BI BI KET ACTIVE TREN KIOSK POP (RULE 20.5)
--- Bang muc tieu: VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING
--- Tac gia: Nguyen Van Duc (vanduc - EA Team)
--- ======================================================================
-BEGIN TRAN;
-
-UPDATE VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING
-SET MAPPING_STATUS      = 'RELEASED',
-    RELEASED_AT         = GETDATE(),
-    RELEASE_REASON      = N'IT 1-Click unlock by Speed Dial (vanduc)',
-    NO_EMP_MODIFYER     = 'vanduc',
-    CD_COMPANY_MODIFYER = 'VINA'
-WHERE (EQUIPMENT_NAME = '${quickUnlockModal.machine}' OR EQUIPMENT_ID = '${quickUnlockModal.machine}')
-  AND MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED');
-
-SELECT @@ROWCOUNT AS [RowsAffected];
-ROLLBACK TRAN;
--- COMMIT TRAN;`}
-        />
-      )}
 
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-900 bg-white/80 dark:bg-slate-950/80 py-4 relative z-10 text-center text-xs text-slate-500 dark:text-slate-500 transition-colors">

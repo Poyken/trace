@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { 
   Zap, 
-  Unlock, 
   RotateCcw, 
   Lock, 
   FileSpreadsheet, 
@@ -16,10 +15,9 @@ import {
 
 interface FloatingSpeedDialProps {
   onNavigateTab: (tabId: string) => void;
-  onOpenUnlockModal: () => void;
 }
 
-export default function FloatingSpeedDial({ onNavigateTab, onOpenUnlockModal }: FloatingSpeedDialProps) {
+export default function FloatingSpeedDial({ onNavigateTab }: FloatingSpeedDialProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
 
@@ -29,18 +27,6 @@ export default function FloatingSpeedDial({ onNavigateTab, onOpenUnlockModal }: 
         {/* Expanded Speed Dial Actions */}
         {isOpen && (
           <div className="flex flex-col items-end gap-2 animate-fade-in mb-1">
-            <button
-              onClick={() => {
-                onOpenUnlockModal();
-                setIsOpen(false);
-              }}
-              className="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold shadow-xl hover:border-cyan-500 transition group"
-            >
-              <span className="opacity-80 group-hover:opacity-100">1-Click Mở Khóa Máy ACTIVE</span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
-                <Unlock className="w-4 h-4" />
-              </div>
-            </button>
 
             <button
               onClick={() => {

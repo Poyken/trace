@@ -23,7 +23,7 @@ export default function HotfixTab() {
     { id: 'defect-null', label: 'Chuẩn hóa RepairQty = 0 (hiện cột NG B782)' },
     { id: 'lineinput', label: 'Kích hoạt lại IsLineInput = 1' },
     { id: 'solution', label: 'Cấp cứu thùng dung dịch điện giải 150kg' },
-    { id: 'unlock', label: 'Rule 20.5: Giải phóng máy kẹt ACTIVE' },
+    { id: 'fix-routing', label: 'Bổ sung công đoạn PO bị thiếu (Aging V-26_HY)' },
     { id: 'pack', label: 'PackingID: Mở quyền in lại tem' },
     { id: 'thick', label: 'Rule 20.3: Sửa độ dày điện cực < 100' }
   ];
@@ -207,22 +207,30 @@ SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
 -- COMMIT TRAN;`;
 
-      case 'unlock':
+      case 'fix-routing':
         return `-- ======================================================================
--- HOTFIX: GIAI PHONG THIET BI BI KET ACTIVE TREN KIOSK POP (RULE 20.5)
--- Bang muc tieu: VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING
--- Tac gia: Nguyen Van Duc (vanduc - EA Team)
+-- HOTFIX: BO SUNG CONG DOAN AGING / DINH TUYEN BI THIEU VAO PO
+-- Bang muc tieu: SmartFactoryV2.dbo.STB_ProductionOrderRouting
+-- Tac gia: Nguyen Van Duc (vanduc - EA Team) | Ngay tao: ${new Date().toLocaleDateString('vi-VN')}
 -- ======================================================================
 BEGIN TRAN;
 
-UPDATE VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING
-SET MAPPING_STATUS      = 'RELEASED',
-    RELEASED_AT         = GETDATE(),
-    RELEASE_REASON      = N'IT unlock machine by Web Portal (vanduc)',
-    NO_EMP_MODIFYER     = 'vanduc',
-    CD_COMPANY_MODIFYER = 'VINA'
-WHERE (EQUIPMENT_NAME = '${targetMachine}' OR EQUIPMENT_ID = '${targetMachine}')
-  AND MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED');
+-- 1. Day lui cac RouteIndex phia sau (>= 5) them 1 bac de danh cho cho Aging
+UPDATE SmartFactoryV2.dbo.STB_ProductionOrderRouting
+SET RouteIndex = RouteIndex + 1,
+    ChangeUserID = 'vanduc',
+    ChangeDateTime = GETDATE()
+WHERE ProductionOrder = '${targetLot}'
+  AND RouteIndex >= 5;
+
+-- 2. Chen lai cong doan bi thieu (Vi du V-26_HY Aging) vao RouteIndex 5
+INSERT INTO SmartFactoryV2.dbo.STB_ProductionOrderRouting (
+    ProductionOrder, RouteIndex, RouteCode, ProcessCode,
+    ChangeUserID, ChangeDateTime, InsertUserID, InsertDateTime
+) VALUES (
+    '${targetLot}', 5, 'V-26_HY', 'PROC_AGING',
+    'vanduc', GETDATE(), 'vanduc', GETDATE()
+);
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
@@ -394,8 +402,8 @@ ROLLBACK TRAN;
         onClose={() => setIsApprovalOpen(false)}
         title={`Duyệt Hotfix: ${hotfixList.find(h => h.id === template)?.label || template}`}
         sql={sqlCode}
-        targetDb={template.includes('pop') || template === 'unlock' ? 'VINATECH_POP' : 'SmartFactoryV2'}
-        targetTable={template === 'unlock' ? 'VINA_EQUIPMENT_MAPPING' : template === 'swap' ? 'STB_ProdRouteHist & MongoToMesPerformance' : ''}
+        targetDb={template.includes('pop') ? 'VINATECH_POP' : 'SmartFactoryV2'}
+        targetTable={template === 'fix-routing' ? 'STB_ProductionOrderRouting' : template === 'swap' ? 'STB_ProdRouteHist & MongoToMesPerformance' : ''}
       />
     </div>
   );

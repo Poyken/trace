@@ -73,6 +73,24 @@ export interface TraceResult {
     isPrintAllow: boolean;
     printCount: number;
   };
+  poCode?: string;
+  basicRoutingCode?: string;
+  basicRoutingName?: string;
+  poRouting?: {
+    routeIndex: number;
+    routeCode: string;
+    routeName: string;
+    isInputRoute?: boolean;
+    isOutputRoute?: boolean;
+    changeUser?: string;
+    changeDateTime?: string;
+  }[];
+  missingStandardRoutes?: {
+    routeCode: string;
+    routeName: string;
+    routeIndex: number;
+  }[];
+  rawCliOutput?: string;
 }
 
 export interface UserInspectionResult {
@@ -134,7 +152,7 @@ export interface ChatMessage {
   };
   quickActions?: {
     label: string;
-    actionType: 'trace' | 'nvl' | 'unlock' | 'user' | 'pack' | 'copy_sql';
+    actionType: 'trace' | 'lineage' | 'locks' | 'bom' | 'user' | 'pack' | 'copy_sql';
     payload: string;
   }[];
 }

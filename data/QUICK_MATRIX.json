@@ -535,13 +535,14 @@
       "sp_iud": "usp_SanminaIndiaLabelPrintHist_iud",
       "tables": [
         "STB_SanminaIndiaLabelPrintHist",
-        "STB_SanminaShipmentPlan"
+        "STB_SanminaShipmentPlan",
+        "STB_SanminaPrintQueue"
       ],
       "common_bugs": {
-        "lưới_tìm_kiếm_lần_2_bị_lặp_dữ_liệu_(6_dò": "Thuộc tính `데이터 추가` (Append Data) của hàm tìm kiếm đang set `True` -> Mở NAIS screen designer B767 → Chọn SearchFunction → Chuyển `데이터 추가` từ `True` sang `False`",
+        "lưới_tìm_kiếm_lần_2_bị_lặp_dữ_liệu_(6_dò": "Nếu muốn in đơn lẻ: chuyển `데이터 추가` về `False`. Nếu muốn in hàng loạt Pallet/Lô: giữ `데이터 추가` = `True` và dùng queue `STB_SanminaPrintQueue`",
         "s_n_của_tem_outer_(tem_đầu_tiên)_bị_trốn": "SP `usp_SanminaLabelPrint_get_Vietnam` set PrintSerialNo trống cho Outer label -> Sửa SP: gộp Inner1Serial và Inner2Serial thành danh sách phân cách bằng dấu phẩy cho BoxSerialNo và PrintSerialNo của Outer label"
       },
-      "fix_template": "Thuộc tính `데이터 추가` (Append Data) của hàm tìm kiếm đang set `True` -> Mở NAIS screen designer B767 → Chọn SearchFunction → Chuyển `데이터 추가` từ `True` sang `False`"
+      "fix_template": "In hàng loạt Pallet B767: Set `데이터 추가` = `True`, truyền `@pBoxCount`, SP tự động tịnh tiến số thùng & serial qua `STB_SanminaPrintQueue`."
     },
     "B781": {
       "name": "Tra SL đóng gói",

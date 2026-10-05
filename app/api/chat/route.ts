@@ -40,7 +40,7 @@ QUY TẮC CỐT LÕI (BẤT BIẾN):
   2. Lỗi 'Already completed': Do WinForm sinh sẵn dòng kế tiếp, xóa dòng thừa trong STB_ProdRouteHist & STB_ProdRouteWorkerHist.
   3. Nút Cắt điện cực mờ: Do MaterialThickness < 100 trong STB_MaterialMaster.
   4. Nạp cuộn BTP: Tối đa 3 LOTNO cho 1 mã cắt.
-  5. Kẹt máy ACTIVE POP: Giải phóng qua lệnh unlock hoặc UPDATE VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING về RELEASED.
+  5. Định tuyến PO bị thiếu công đoạn chuẩn (như Aging V-26_HY): Kiểm tra STB_ProductionOrderRouting vs STB_BasicRoutingDetail và bổ sung dòng định tuyến bị xóa.
 - ĐỊNH DANH SỰ CỐ & PHÂN LOẠI ISSUE (RULE 22):
   Mọi sự cố, task, ticket hoặc báo cáo tuần liên quan đến POP (Kiosk xưởng, Web POP, nạp NVL Kiosk, kẹt máy Kiosk, đồng bộ MongoToMesPerformance) BẮT BUỘC ghi phân loại/hệ thống là POP, TUYỆT ĐỐI KHÔNG ghi là MES. MES chỉ dành riêng cho Core MES Sản Xuất WinForm B-series & CSDL lõi.`
                 }]
@@ -121,7 +121,7 @@ ${structured.hotfixSql}
         structuredResponse: structured,
         quickActions: [
           { label: `Trace 360° ${targetLot}`, actionType: 'trace', payload: targetLot },
-          { label: `Mở khóa máy ${targetMachine}`, actionType: 'unlock', payload: targetMachine },
+          { label: `Soi Huyết Mạch ${targetLot}`, actionType: 'lineage', payload: targetLot },
           { label: 'Copy SQL Hotfix', actionType: 'copy_sql', payload: hotfixSql }
         ],
         timestamp: new Date().toISOString()
@@ -197,7 +197,7 @@ ${structured.hotfixSql}
         structuredResponse: structured,
         quickActions: [
           { label: `Trace 360° ${targetLot}`, actionType: 'trace', payload: targetLot },
-          { label: `Mở khóa máy ${targetMachine}`, actionType: 'unlock', payload: targetMachine },
+          { label: `Soi Huyết Mạch ${targetLot}`, actionType: 'lineage', payload: targetLot },
           { label: 'Copy SQL Hotfix', actionType: 'copy_sql', payload: hotfixSql }
         ],
         timestamp: new Date().toISOString()

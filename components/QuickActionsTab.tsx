@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Zap, 
   RotateCcw, 
-  Unlock, 
+  GitFork, 
   Calendar, 
   Trash2, 
   FlaskConical, 
@@ -128,28 +128,37 @@ ROLLBACK TRAN;
 -- COMMIT TRAN;`
     },
     {
-      id: 'unlock',
-      title: 'Giải Phóng Máy Kẹt ACTIVE (Rule 20.5)',
-      tag: 'POP KIOSK',
-      tagColor: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800',
-      description: 'Mở khóa thiết bị Kiosk bị treo giữ phiên thao tác (VINA_EQUIPMENT_MAPPING).',
-      icon: Unlock,
-      targetDb: 'VINATECH_POP',
-      defaultInputs: { machine: selectedMachine },
-      sqlGenerator: ({ machine }) => `-- ======================================================================
--- HOTFIX: GIAI PHONG THIET BI BI KET ACTIVE TREN KIOSK POP (RULE 20.5)
+      id: 'fix_routing',
+      title: 'Bổ Sung Công Đoạn PO (Aging V-26_HY)',
+      tag: 'ĐỊNH TUYẾN PO',
+      tagColor: 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800',
+      description: 'Chèn lại bước Aging V-26_HY vào STB_ProductionOrderRouting khi PO bị sửa nhảy cóc công đoạn.',
+      icon: GitFork,
+      targetDb: 'SmartFactoryV2',
+      defaultInputs: { lot: selectedLot },
+      sqlGenerator: ({ lot }) => `-- ======================================================================
+-- HOTFIX: BO SUNG CONG DOAN AGING / DINH TUYEN BI THIEU VAO PO
+-- Bang muc tieu: SmartFactoryV2.dbo.STB_ProductionOrderRouting
 -- Tac gia: Nguyen Van Duc (vanduc - EA Team)
 -- ======================================================================
 BEGIN TRAN;
 
-UPDATE VINATECH_POP.dbo.VINA_EQUIPMENT_MAPPING
-SET MAPPING_STATUS      = 'RELEASED',
-    RELEASED_AT         = GETDATE(),
-    RELEASE_REASON      = N'IT 1-Click unlock by Web Portal (vanduc)',
-    NO_EMP_MODIFYER     = 'vanduc',
-    CD_COMPANY_MODIFYER = 'VINA'
-WHERE (EQUIPMENT_NAME = '${machine}' OR EQUIPMENT_ID = '${machine}')
-  AND MAPPING_STATUS IN ('ACTIVE', 'AUTO_MAPPED');
+-- 1. Day lui cac RouteIndex phia sau (>= 5) them 1 bac de danh cho cho Aging
+UPDATE SmartFactoryV2.dbo.STB_ProductionOrderRouting
+SET RouteIndex = RouteIndex + 1,
+    ChangeUserID = 'vanduc',
+    ChangeDateTime = GETDATE()
+WHERE ProductionOrder = '${lot}'
+  AND RouteIndex >= 5;
+
+-- 2. Chen lai cong doan bi thieu (Vi du V-26_HY Aging) vao RouteIndex 5
+INSERT INTO SmartFactoryV2.dbo.STB_ProductionOrderRouting (
+    ProductionOrder, RouteIndex, RouteCode, ProcessCode,
+    ChangeUserID, ChangeDateTime, InsertUserID, InsertDateTime
+) VALUES (
+    '${lot}', 5, 'V-26_HY', 'PROC_AGING',
+    'vanduc', GETDATE(), 'vanduc', GETDATE()
+);
 
 SELECT @@ROWCOUNT AS [RowsAffected];
 ROLLBACK TRAN;
@@ -439,14 +448,14 @@ ROLLBACK TRAN;
   ];
 
   const validateInputs = (action: QuickActionConfig): boolean => {
-    if (action.id !== 'unlock' && !selectedLot.trim()) {
+    if (!selectedLot.trim()) {
       setStatusMessage({
-        text: `⚠️ Vui lòng nhập Mã Lot trước khi thao tác "${action.title}"`,
+        text: `⚠️ Vui lòng nhập Mã Lot / PO trước khi thao tác "${action.title}"`,
         type: 'error'
       });
       return false;
     }
-    if ((action.id === 'swap' || action.id === 'unlock') && !selectedMachine.trim()) {
+    if (action.id === 'swap' && !selectedMachine.trim()) {
       setStatusMessage({
         text: `⚠️ Vui lòng nhập Mã Máy (Thiết bị) trước khi thao tác "${action.title}"`,
         type: 'error'
@@ -731,7 +740,7 @@ ROLLBACK TRAN;
                         {selectedLot || '(Chưa điền)'}
                       </b>
                     </div>
-                    {action.id === 'swap' || action.id === 'unlock' ? (
+                    {action.id === 'swap' ? (
                       <div className="truncate">
                         <span className="text-slate-400">Máy:</span>{' '}
                         <b className={selectedMachine ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-400 dark:text-slate-500 font-normal italic'}>
